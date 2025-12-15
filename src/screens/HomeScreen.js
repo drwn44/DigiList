@@ -1,9 +1,10 @@
 import {FlatList} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {auth, db} from '../firebase.js';
-import {addDoc, collection, deleteDoc, doc, onSnapshot, query, Timestamp, where} from 'firebase/firestore';
+import {doc, addDoc, deleteDoc, updateDoc, collection, onSnapshot, query, Timestamp, where} from 'firebase/firestore';
 import {useEffect, useState} from "react";
 import {Button, Card, Dialog, FAB, IconButton, Modal, Portal, Text, TextInput} from "react-native-paper";
+import { homeStyles as styles } from '../styles/homeStyles';
 
 export default function HomeScreen({ navigation }) {
 
@@ -12,6 +13,8 @@ export default function HomeScreen({ navigation }) {
     const [listName, setListName] = useState('');
     const [deleteVisible, setDeleteVisible] = useState(false);
     const [selectedListId, setSelectedListId] = useState(null);
+    const [editVisible, setEditVisible] = useState(false);
+    const [editingListId, setEditingListId] = useState(null);
 
     useEffect(() => {
         if (!auth.currentUser) return;
@@ -50,19 +53,41 @@ export default function HomeScreen({ navigation }) {
         setSelectedListId(null);
     };
 
+    const updateList = async () => {
+        if (!listName.trim())
+            return;
 
+        await updateDoc(doc(db, 'lists', editingListId), {
+            name: listName,
+        });
+
+        setEditVisible(false);
+        setEditingListId(null);
+        setListName('');
+    };
 
     return (
-        <SafeAreaView style={{flex: 1}}>
+        <SafeAreaView style={styles.container}>
             <Text variant="headlineMedium" style={{ paddingLeft: 16, marginBottom: 16 }}>
                 Bevásárlólisták:
             </Text>
             <FlatList
-                contentContainerStyle={{ padding: 16, paddingBottom: 96 }}
+                contentContainerStyle={{ padding: 16, paddingBottom: 96, flexGrow: lists.length === 0 ? 1 : 0 }}
                 data={lists}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
-                    <Card style={{ marginBottom: 8 }}>
+                    <Card style={{ marginBottom: 8 }}
+                          onPress={() =>
+                              navigation.navigate('ListItemsScreen', {
+                                  listId: item.id,
+                                  listName: item.name,
+                              })
+                          }
+                          onLongPress={() => {
+                              setEditingListId(item.id);
+                              setListName(item.name);
+                              setEditVisible(true);
+                          }}>
                         <Card.Title
                             title={item.name}
                             right={(props) => (
@@ -77,7 +102,18 @@ export default function HomeScreen({ navigation }) {
                             )}
                         />
                     </Card>
+
                 )}
+                ListEmptyComponent={
+                    <SafeAreaView style={styles.emptyContainer}>
+                        <Text variant="titleMedium" style={{ marginBottom: 8 }}>
+                            Nincs még bevásárlólistád
+                        </Text>
+                        <Text variant="bodyMedium" style={{ textAlign: 'center' }}>
+                            Hozz létre egy újat a + gombbal
+                        </Text>
+                    </SafeAreaView>
+                }
             />
             <Portal>
                 <Modal visible={visible} onDismiss={() => setVisible(false)}>
@@ -98,10 +134,7 @@ export default function HomeScreen({ navigation }) {
                         </Button>
                     </Card>
                 </Modal>
-                <Dialog
-                    visible={deleteVisible}
-                    onDismiss={() => setDeleteVisible(false)}
-                >
+                <Dialog visible={deleteVisible} onDismiss={() => setDeleteVisible(false)}>
                     <Dialog.Title>Lista törlése</Dialog.Title>
 
                     <Dialog.Content>
@@ -118,13 +151,29 @@ export default function HomeScreen({ navigation }) {
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
+            <Portal>
+                <Modal visible={editVisible} onDismiss={() => setEditVisible(false)}>
+                    <Card style={{ margin: 16, padding: 16 }}>
+                        <Text variant="titleMedium" style={{ marginBottom: 12 }}>
+                            Lista átnevezése
+                        </Text>
+
+                        <TextInput
+                            label="Új név"
+                            value={listName}
+                            onChangeText={setListName}
+                            style={{ marginBottom: 12 }}
+                        />
+
+                        <Button mode="contained" onPress={updateList}>
+                            Mentés
+                        </Button>
+                    </Card>
+                </Modal>
+            </Portal>
             <FAB
                 icon="plus"
-                style={{
-                    position: 'absolute',
-                    right: 16,
-                    bottom: 16,
-                }}
+                style={styles.fab}
                 onPress={() => setVisible(true)}
             />
         </SafeAreaView>
