@@ -1,16 +1,19 @@
 import { View, FlatList } from 'react-native';
-import { Text, TextInput, Button, Card, Checkbox, FAB } from 'react-native-paper';
-import { useEffect, useState } from 'react';
-import {collection, addDoc, onSnapshot, query, orderBy, Timestamp} from 'firebase/firestore';
-import { db } from '../firebase';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { Text, TextInput, Button, Card, Checkbox, FAB } from 'react-native-paper';
+
+
+import {doc, collection, addDoc, updateDoc, onSnapshot, query, orderBy, Timestamp} from 'firebase/firestore';
+import { db } from '../firebase';
+
 
 export default function ListItemScreen({ route }) {
     const { listId, listName } = route.params;
-
     const [items, setItems] = useState([]);
     const [itemName, setItemName] = useState('');
 
+    //adatlekérdezés
     useEffect(() => {
         const q = query(
             collection(db, 'lists', listId, 'items'),
@@ -40,6 +43,15 @@ export default function ListItemScreen({ route }) {
         setItemName('');
     };
 
+    const toggleDone = async (item) => {
+        await updateDoc(
+            doc(db, 'lists', listId, 'items', item.id),
+            {
+                done: !item.done,
+            }
+        );
+    };
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={{ padding: 16 }}>
@@ -51,12 +63,21 @@ export default function ListItemScreen({ route }) {
                     data={items}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                        <Card style={{ marginBottom: 8 }}>
+                        <Card
+                            style={{
+                                marginBottom: 8,
+                                backgroundColor: item.done ? '#E8F5E9' : 'white'
+                            }}
+                        >
                             <Card.Title
                                 title={item.name}
+                                titleStyle={{
+                                    textDecorationLine: item.done ? 'line-through' : 'none',
+                                }}
                                 left={() => (
                                     <Checkbox
                                         status={item.done ? 'checked' : 'unchecked'}
+                                        onPress={() => toggleDone(item)}
                                     />
                                 )}
                             />
