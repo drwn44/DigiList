@@ -1,19 +1,21 @@
 import { View, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
-import { Text, TextInput, Button, Card, Checkbox, FAB } from 'react-native-paper';
+import {Text, TextInput, Button, Card, Checkbox, FAB, IconButton} from 'react-native-paper';
 
-
-import {doc, collection, addDoc, updateDoc, onSnapshot, query, orderBy, Timestamp} from 'firebase/firestore';
+import {doc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, Timestamp} from 'firebase/firestore';
 import { db } from '../firebase';
+
+import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 
 
 export default function ListItemScreen({ route }) {
     const { listId, listName } = route.params;
     const [items, setItems] = useState([]);
     const [itemName, setItemName] = useState('');
+    const [deleteVisible, setDeleteVisible] = useState(false);
+    const [selectedItemId, setSelectedItemId] = useState(null);
 
-    //adatlekérdezés
     useEffect(() => {
         const q = query(
             collection(db, 'lists', listId, 'items'),
@@ -52,6 +54,15 @@ export default function ListItemScreen({ route }) {
         );
     };
 
+    const confirmDeleteItem = async () => {
+        await deleteDoc(
+            doc(db, 'lists', listId, 'items', selectedItemId)
+        );
+
+        setDeleteVisible(false);
+        setSelectedItemId(null);
+    };
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <View style={{ padding: 16 }}>
@@ -63,12 +74,10 @@ export default function ListItemScreen({ route }) {
                     data={items}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                        <Card
-                            style={{
-                                marginBottom: 8,
-                                backgroundColor: item.done ? '#E8F5E9' : 'white'
-                            }}
-                        >
+                        <Card style={{
+                            marginBottom: 8,
+                            backgroundColor: item.done ? '#E8F5E9' : '#FFFFFF',
+                            opacity: item.done ? 0.6 : 1, }}>
                             <Card.Title
                                 title={item.name}
                                 titleStyle={{
@@ -80,6 +89,20 @@ export default function ListItemScreen({ route }) {
                                         onPress={() => toggleDone(item)}
                                     />
                                 )}
+                                right={() => (
+                                    <IconButton
+                                        icon="delete"
+                                        onPress={() => {
+                                            setSelectedItemId(item.id);
+                                            setDeleteVisible(true);
+                                        }}
+                                    />
+                                )}
+                            />
+                            <ConfirmDeleteDialog
+                                visible={deleteVisible}
+                                onCancel={() => setDeleteVisible(false)}
+                                onConfirm={confirmDeleteItem}
                             />
                         </Card>
                     )}
