@@ -1,11 +1,13 @@
 import {FlatList} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {auth, db} from '../firebase.js';
-import {doc, addDoc, deleteDoc, updateDoc, collection, onSnapshot, query, Timestamp, where} from 'firebase/firestore';
+import {addDoc, collection, deleteDoc, doc, onSnapshot, query, Timestamp, updateDoc, where} from 'firebase/firestore';
 import {useEffect, useState} from "react";
 import {Button, Card, Dialog, FAB, IconButton, Modal, Portal, Text, TextInput} from "react-native-paper";
-import { homeStyles as styles } from '../styles/homeStyles';
+import {homeStyles as styles} from '../styles/homeStyles';
 import EmptyState from "../components/EmptyState";
+import AppHeader from '../components/AppHeader';
+import LogoutConfirmDialog from "../components/LogoutConfirmDialog";
 
 export default function HomeScreen({ navigation }) {
 
@@ -16,6 +18,7 @@ export default function HomeScreen({ navigation }) {
     const [selectedListId, setSelectedListId] = useState(null);
     const [editVisible, setEditVisible] = useState(false);
     const [editingListId, setEditingListId] = useState(null);
+    const [logoutVisible, setLogoutVisible] = useState(false);
 
     useEffect(() => {
         if (!auth.currentUser) return;
@@ -25,15 +28,13 @@ export default function HomeScreen({ navigation }) {
             where('userId', '==', auth.currentUser.uid)
         );
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+        return onSnapshot(q, (snapshot) => {
             const data = snapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
             }));
             setLists(data);
         });
-
-        return unsubscribe;
     }, []);
 
     const createList = async () => {
@@ -69,9 +70,7 @@ export default function HomeScreen({ navigation }) {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text variant="headlineMedium" style={{ paddingLeft: 16, marginBottom: 16 }}>
-                Bevásárlólisták:
-            </Text>
+            <AppHeader title="Bevásárlólisták" onLogoutPress={() => setLogoutVisible(true)}/>
             <FlatList
                 contentContainerStyle={{ padding: 16, paddingBottom: 96, flexGrow: lists.length === 0 ? 1 : 0 }}
                 data={lists}
@@ -111,6 +110,14 @@ export default function HomeScreen({ navigation }) {
                     </Card>
 
                 )}
+            />
+            <LogoutConfirmDialog
+                visible={logoutVisible}
+                onCancel={() => setLogoutVisible(false)}
+                onConfirm={async () => {
+                    setLogoutVisible(false);
+                    await auth.signOut();
+                }}
             />
             <Portal>
                 <Modal visible={visible} onDismiss={() => setVisible(false)}>
