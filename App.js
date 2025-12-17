@@ -1,24 +1,28 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Provider as PaperProvider } from 'react-native-paper';
-
-import LoginScreen from './src/screens/LoginScreen';
-import RegisterScreen from './src/screens/RegisterScreen';
-import HomeScreen from './src/screens/HomeScreen';
-import ListItemsScreen from './src/screens/ListItemsScreen';
-
-const Stack = createNativeStackNavigator();
+import {NavigationContainer} from '@react-navigation/native';
+import {Provider as PaperProvider} from 'react-native-paper';
+import {auth} from './src/firebase';
+import {onAuthStateChanged} from 'firebase/auth';
+import {useEffect, useState} from "react";
+import AppStack from "./src/navigation/AppStack";
+import AuthStack from "./src/navigation/AuthStack";
 
 export default function App() {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        return onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setLoading(false);
+        });
+    }, []);
+
+    if (loading) return null;
+
     return (
         <PaperProvider>
             <NavigationContainer>
-                <Stack.Navigator initialRouteName="Login">
-                    <Stack.Screen name="Login" component={LoginScreen} />
-                    <Stack.Screen name="Register" component={RegisterScreen} />
-                    <Stack.Screen name="Home" component={HomeScreen} />
-                    <Stack.Screen name="ListItemsScreen" component={ListItemsScreen}/>
-                </Stack.Navigator>
+                {user ? <AppStack /> : <AuthStack />}
             </NavigationContainer>
         </PaperProvider>
     );

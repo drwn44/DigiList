@@ -19,7 +19,6 @@ export default function LoginScreen({ navigation }) {
         try {
             setLoading(true);
             await signInWithEmailAndPassword(auth, email, password);
-            navigation.replace('Home');
         } catch (e) {
             alert(e.message);
         } finally {

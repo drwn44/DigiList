@@ -18,7 +18,6 @@ export default function RegisterScreen({ navigation }) {
         try {
             setLoading(true);
             await createUserWithEmailAndPassword(auth, email, password);
-            navigation.replace('Home');
         } catch (e) {
             alert(e.message);
         } finally {
