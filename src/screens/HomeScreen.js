@@ -5,6 +5,7 @@ import {doc, addDoc, deleteDoc, updateDoc, collection, onSnapshot, query, Timest
 import {useEffect, useState} from "react";
 import {Button, Card, Dialog, FAB, IconButton, Modal, Portal, Text, TextInput} from "react-native-paper";
 import { homeStyles as styles } from '../styles/homeStyles';
+import EmptyState from "../components/EmptyState";
 
 export default function HomeScreen({ navigation }) {
 
@@ -75,6 +76,12 @@ export default function HomeScreen({ navigation }) {
                 contentContainerStyle={{ padding: 16, paddingBottom: 96, flexGrow: lists.length === 0 ? 1 : 0 }}
                 data={lists}
                 keyExtractor={(item) => item.id}
+                ListEmptyComponent={
+                    <EmptyState
+                        title="Nincs még bevásárlólistád"
+                        subtitle="Hozz létre egyet a + gombbal"
+                    />
+                }
                 renderItem={({ item }) => (
                     <Card style={{ marginBottom: 8 }}
                           onPress={() =>
@@ -104,16 +111,6 @@ export default function HomeScreen({ navigation }) {
                     </Card>
 
                 )}
-                ListEmptyComponent={
-                    <SafeAreaView style={styles.emptyContainer}>
-                        <Text variant="titleMedium" style={{ marginBottom: 8 }}>
-                            Nincs még bevásárlólistád
-                        </Text>
-                        <Text variant="bodyMedium" style={{ textAlign: 'center' }}>
-                            Hozz létre egy újat a + gombbal
-                        </Text>
-                    </SafeAreaView>
-                }
             />
             <Portal>
                 <Modal visible={visible} onDismiss={() => setVisible(false)}>
@@ -136,7 +133,6 @@ export default function HomeScreen({ navigation }) {
                 </Modal>
                 <Dialog visible={deleteVisible} onDismiss={() => setDeleteVisible(false)}>
                     <Dialog.Title>Lista törlése</Dialog.Title>
-
                     <Dialog.Content>
                         <Text>Biztosan törölni szeretnéd ezt a listát?</Text>
                     </Dialog.Content>

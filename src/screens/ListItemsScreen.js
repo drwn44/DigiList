@@ -7,6 +7,7 @@ import {doc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderB
 import { db } from '../firebase';
 
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
+import EmptyState from "../components/EmptyState";
 
 
 export default function ListItemScreen({ route }) {
@@ -73,6 +74,16 @@ export default function ListItemScreen({ route }) {
                 <FlatList
                     data={items}
                     keyExtractor={(item) => item.id}
+                    contentContainerStyle={[
+                        { padding: 16 },
+                        items.length === 0 && { flexGrow: 1 },
+                    ]}
+                    ListEmptyComponent={
+                        <EmptyState
+                            title="Ez a lista még üres"
+                            subtitle="Adj hozzá egy elemet alul"
+                        />
+                    }
                     renderItem={({ item }) => (
                         <Card style={{
                             marginBottom: 8,
@@ -99,15 +110,14 @@ export default function ListItemScreen({ route }) {
                                     />
                                 )}
                             />
-                            <ConfirmDeleteDialog
-                                visible={deleteVisible}
-                                onCancel={() => setDeleteVisible(false)}
-                                onConfirm={confirmDeleteItem}
-                            />
                         </Card>
                     )}
                 />
-
+                <ConfirmDeleteDialog
+                    visible={deleteVisible}
+                    onCancel={() => setDeleteVisible(false)}
+                    onConfirm={confirmDeleteItem}
+                />
                 <TextInput
                     label="Új elem"
                     value={itemName}
