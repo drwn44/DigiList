@@ -17,6 +17,9 @@ export default function ListItemScreen({ route }) {
     const [deleteVisible, setDeleteVisible] = useState(false);
     const [selectedItemId, setSelectedItemId] = useState(null);
 
+    const totalCount = items.length;
+    const doneCount = items.filter(item => item.done).length;
+
     useEffect(() => {
         const q = query(
             collection(db, 'lists', listId, 'items'),
@@ -70,7 +73,17 @@ export default function ListItemScreen({ route }) {
                 <Text variant="headlineMedium" style={{ marginBottom: 16 }}>
                     {listName}
                 </Text>
-
+                <Text
+                    variant="bodyMedium"
+                    style={{
+                        paddingHorizontal: 16,
+                        marginBottom: 8,
+                        opacity: 0.7,
+                        color: doneCount === totalCount && totalCount > 0 ? '#2E7D32' : undefined,
+                    }}
+                >
+                    {doneCount} / {totalCount} elem a kosárban
+                </Text>
                 <FlatList
                     data={items}
                     keyExtractor={(item) => item.id}
@@ -84,6 +97,7 @@ export default function ListItemScreen({ route }) {
                             subtitle="Adj hozzá egy elemet alul"
                         />
                     }
+
                     renderItem={({ item }) => (
                         <Card style={{
                             marginBottom: 8,
