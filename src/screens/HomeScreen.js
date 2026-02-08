@@ -19,6 +19,7 @@ export default function HomeScreen({ navigation }) {
     const [editVisible, setEditVisible] = useState(false);
     const [editingListId, setEditingListId] = useState(null);
     const [logoutVisible, setLogoutVisible] = useState(false);
+    const [actionVisible, setActionVisible] = useState(false);
 
     useEffect(() => {
         if (!auth.currentUser) return;
@@ -91,9 +92,10 @@ export default function HomeScreen({ navigation }) {
                               })
                           }
                           onLongPress={() => {
+                              setSelectedListId(item.id);
                               setEditingListId(item.id);
                               setListName(item.name);
-                              setEditVisible(true);
+                              setActionVisible(true);
                           }}>
                         <Card.Title
                             title={item.name}
@@ -164,6 +166,45 @@ export default function HomeScreen({ navigation }) {
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
+
+            <Portal>
+                <Dialog
+                    visible={actionVisible}
+                    onDismiss={() => setActionVisible(false)}
+                >
+                    <Dialog.Title>Lista műveletek</Dialog.Title>
+                    <Dialog.Actions>
+                        <Button
+                            onPress={() => {
+                                setActionVisible(false);
+                                setEditVisible(true);
+                            }}
+                        >
+                            Átnevezés
+                        </Button>
+
+                        <Button
+                            onPress={() => {
+                                setActionVisible(false);
+                                alert('TODO');
+                            }}
+                        >
+                            Megosztás
+                        </Button>
+
+                        <Button
+                            textColor="red"
+                            onPress={() => {
+                                setActionVisible(false);
+                                setDeleteVisible(true);
+                            }}
+                        >
+                            Törlés
+                        </Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
+
             <Portal>
                 <Modal visible={editVisible} onDismiss={() => setEditVisible(false)}>
                     <Card style={{ margin: 16, padding: 16 }}>
