@@ -108,14 +108,6 @@ export default function HomeScreen({ navigation }) {
                                             iconColor="#2E7D32"
                                         />
                                     )}
-                                    <IconButton
-                                        {...props}
-                                        icon="delete"
-                                        onPress={() => {
-                                            setSelectedListId(item.id);
-                                            setDeleteVisible(true);
-                                        }}
-                                    />
                                 </>
                             )}
                         />
