@@ -43,6 +43,7 @@ export default function HomeScreen({ navigation }) {
             name: listName,
             userId: auth.currentUser.uid,
             createdAt: Timestamp.now(),
+            completed: false,
         });
 
         setListName('');
@@ -82,7 +83,7 @@ export default function HomeScreen({ navigation }) {
                     />
                 }
                 renderItem={({ item }) => (
-                    <Card style={{ marginBottom: 8 }}
+                    <Card style={{ marginBottom: 8, backgroundColor: item.completed ? '#E8F5E9' : '#FFFFFF', }}
                           onPress={() =>
                               navigation.navigate('ListItemsScreen', {
                                   listId: item.id,
@@ -97,14 +98,23 @@ export default function HomeScreen({ navigation }) {
                         <Card.Title
                             title={item.name}
                             right={(props) => (
-                                <IconButton
-                                    {...props}
-                                    icon="delete"
-                                    onPress={() => {
-                                        setSelectedListId(item.id);
-                                        setDeleteVisible(true);
-                                    }}
-                                />
+                                <>
+                                    {item.completed && (
+                                        <IconButton
+                                            {...props}
+                                            icon="check-circle"
+                                            iconColor="#2E7D32"
+                                        />
+                                    )}
+                                    <IconButton
+                                        {...props}
+                                        icon="delete"
+                                        onPress={() => {
+                                            setSelectedListId(item.id);
+                                            setDeleteVisible(true);
+                                        }}
+                                    />
+                                </>
                             )}
                         />
                     </Card>

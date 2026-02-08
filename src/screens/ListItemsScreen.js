@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import {Text, TextInput, Button, Card, Checkbox, FAB, IconButton} from 'react-native-paper';
 
-import {doc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, Timestamp} from 'firebase/firestore';
+import {doc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, Timestamp} from 'firebase/firestore';
 import { db } from '../firebase';
 
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
@@ -21,17 +21,24 @@ export default function ListItemScreen({ route }) {
     const doneCount = items.filter(item => item.done).length;
 
     useEffect(() => {
-        const q = query(
-            collection(db, 'lists', listId, 'items'),
-            orderBy('createdAt')
-        );
+        const q = collection(db, 'lists', listId, 'items');
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+        const unsubscribe = onSnapshot(q, async (snapshot) => {
             const data = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
             }));
             setItems(data);
+            if (data.length === 0) {
+                await updateDoc(doc(db, 'lists', listId), {
+                    completed: false,
+                });
+                return;
+            }
+            const allDone = data.every(item => item.done === true);
+            await updateDoc(doc(db, 'lists', listId), {
+                completed: allDone,
+            });
         });
 
         return unsubscribe;
