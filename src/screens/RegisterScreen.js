@@ -2,7 +2,8 @@ import { View } from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
 import { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
+import { setDoc, doc, Timestamp } from 'firebase/firestore';
+import {auth, db} from '../firebase';
 import { authStyles as styles } from '../styles/authStyles';
 
 export default function RegisterScreen({ navigation }) {
@@ -17,7 +18,12 @@ export default function RegisterScreen({ navigation }) {
         }
         try {
             setLoading(true);
-            await createUserWithEmailAndPassword(auth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+            await setDoc(doc(db, 'users', userCredential.user.uid), {
+                email: userCredential.user.email.toLowerCase(),
+                createdAt: Timestamp.now(),
+            });
         } catch (e) {
             alert(e.message);
         } finally {

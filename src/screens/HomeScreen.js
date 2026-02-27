@@ -26,7 +26,7 @@ export default function HomeScreen({ navigation }) {
 
         const q = query(
             collection(db, 'lists'),
-            where('userId', '==', auth.currentUser.uid)
+            where('members', 'array-contains', auth.currentUser.uid)
         );
 
         return onSnapshot(q, (snapshot) => {
@@ -43,6 +43,7 @@ export default function HomeScreen({ navigation }) {
         await addDoc(collection(db, 'lists'), {
             name: listName,
             userId: auth.currentUser.uid,
+            members: [auth.currentUser.uid],  // 👈 add this
             createdAt: Timestamp.now(),
             completed: false,
         });
