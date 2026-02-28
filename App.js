@@ -1,9 +1,9 @@
-import {NavigationContainer} from '@react-navigation/native';
-import {Provider as PaperProvider} from 'react-native-paper';
-import {auth} from './src/firebase';
-import {onAuthStateChanged} from 'firebase/auth';
-import {useEffect, useState} from "react";
-import AppStack from "./src/navigation/AppStack";
+import { NavigationContainer } from '@react-navigation/native';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { auth } from './src/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useEffect, useState } from "react";
+import AppTabs from "./src/navigation/AppTabs";
 import AuthStack from "./src/navigation/AuthStack";
 
 export default function App() {
@@ -22,7 +22,7 @@ export default function App() {
     return (
         <PaperProvider>
             <NavigationContainer>
-                {user ? <AppStack /> : <AuthStack />}
+                {user ? <AppTabs /> : <AuthStack />}
             </NavigationContainer>
         </PaperProvider>
     );

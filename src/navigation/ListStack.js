@@ -4,7 +4,7 @@ import ListItemsScreen from '../screens/ListItemsScreen';
 
 const Stack = createNativeStackNavigator();
 
-export default function AppStack() {
+export default function ListStack() {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Home" component={HomeScreen} />
