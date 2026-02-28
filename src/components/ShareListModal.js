@@ -1,0 +1,155 @@
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import { Modal, Card, Text, TextInput, IconButton, ActivityIndicator } from 'react-native-paper';
+import { collection, query, where, getDocs, updateDoc, doc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { auth, db } from '../firebase';
+
+export default function ShareListModal({ visible, onDismiss, listId, members = [] }) {
+    const [email, setEmail] = useState('');
+    const [memberDetails, setMemberDetails] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [addError, setAddError] = useState('');
+
+    useEffect(() => {
+        if (!visible || members.length === 0) return;
+
+        const fetchMembers = async () => {
+            const results = await Promise.all(
+                members.map(async (uid) => {
+                    const q = query(collection(db, 'users'), where('__name__', '==', uid));
+                    const snapshot = await getDocs(q);
+                    if (!snapshot.empty) {
+                        return { uid, email: snapshot.docs[0].data().email };
+                    }
+                    return { uid, email: 'Ismeretlen felhasználó' };
+                })
+            );
+            setMemberDetails(results);
+        };
+
+        fetchMembers();
+    }, [visible, members]);
+
+    const handleAdd = async () => {
+        setAddError('');
+        const trimmed = email.trim().toLowerCase();
+        if (!trimmed) return;
+
+        if (trimmed === auth.currentUser.email.toLowerCase()) {
+            setAddError('Saját magaddal nem oszthatod meg.');
+            return;
+        }
+
+        const alreadyMember = memberDetails.some(m => m.email === trimmed);
+        if (alreadyMember) {
+            setAddError('Ez a felhasználó már tag.');
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const q = query(collection(db, 'users'), where('email', '==', trimmed));
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+                setAddError('Nem található felhasználó ezzel az email címmel.');
+                return;
+            }
+
+            const newMemberUid = snapshot.docs[0].id;
+            await updateDoc(doc(db, 'lists', listId), {
+                members: arrayUnion(newMemberUid),
+            });
+
+            setEmail('');
+        } catch (e) {
+            console.error('Share error:', e);
+            setAddError('Hiba történt, próbáld újra.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRemove = async (uid) => {
+        try {
+            await updateDoc(doc(db, 'lists', listId), {
+                members: arrayRemove(uid),
+            });
+        } catch (e) {
+            alert('Nem sikerült eltávolítani a tagot.');
+        }
+    };
+
+    const handleDismiss = () => {
+        setEmail('');
+        setAddError('');
+        onDismiss();
+    };
+
+    const ownerUid = members[0];
+
+    return (
+        <Modal visible={visible} onDismiss={handleDismiss}>
+            <Card style={{ margin: 16, padding: 16 }}>
+                <Text variant="titleMedium" style={{ marginBottom: 16 }}>
+                    Lista megosztása
+                </Text>
+
+                {/* Email input row */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                    <TextInput
+                        label="Email cím"
+                        value={email}
+                        onChangeText={(text) => {
+                            setEmail(text);
+                            setAddError('');
+                        }}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                        style={{ flex: 1, marginRight: 8 }}
+                    />
+                    {loading
+                        ? <ActivityIndicator style={{ marginLeft: 8 }} />
+                        : <IconButton icon="send" onPress={handleAdd} />
+                    }
+                </View>
+
+                {addError ? (
+                    <Text style={{ color: 'red', marginBottom: 8, fontSize: 12 }}>
+                        {addError}
+                    </Text>
+                ) : null}
+
+                <Text variant="labelLarge" style={{ marginTop: 12, marginBottom: 8 }}>
+                    Megosztva ezekkel:
+                </Text>
+
+                {memberDetails.map((member) => (
+                    <View
+                        key={member.uid}
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            paddingVertical: 4,
+                        }}
+                    >
+                        <Text style={{ flex: 1 }}>
+                            {member.email}
+                            {member.uid === ownerUid ? '  👑' : ''}
+                        </Text>
+
+                        {member.uid !== ownerUid && member.uid !== auth.currentUser.uid && (
+                            <IconButton
+                                icon="close"
+                                size={18}
+                                onPress={() => handleRemove(member.uid)}
+                            />
+                        )}
+                    </View>
+                ))}
+            </Card>
+        </Modal>
+    );
+}

@@ -1,4 +1,5 @@
 import {FlatList} from 'react-native';
+import ShareListModal from '../components/ShareListModal';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {auth, db} from '../firebase.js';
 import {addDoc, collection, deleteDoc, doc, onSnapshot, query, Timestamp, updateDoc, where} from 'firebase/firestore';
@@ -9,17 +10,23 @@ import EmptyState from "../components/EmptyState";
 import AppHeader from '../components/AppHeader';
 import LogoutConfirmDialog from "../components/LogoutConfirmDialog";
 
+
 export default function HomeScreen({ navigation }) {
 
     const [lists, setLists] = useState([]);
     const [visible, setVisible] = useState(false);
     const [listName, setListName] = useState('');
     const [deleteVisible, setDeleteVisible] = useState(false);
+
     const [selectedListId, setSelectedListId] = useState(null);
     const [editVisible, setEditVisible] = useState(false);
     const [editingListId, setEditingListId] = useState(null);
+
     const [logoutVisible, setLogoutVisible] = useState(false);
     const [actionVisible, setActionVisible] = useState(false);
+
+    const [shareVisible, setShareVisible] = useState(false);
+    const [sharingList, setSharingList] = useState(null);
 
     useEffect(() => {
         if (!auth.currentUser) return;
@@ -167,7 +174,9 @@ export default function HomeScreen({ navigation }) {
                 >
                     <Dialog.Title>Lista műveletek</Dialog.Title>
                     <Dialog.Actions>
-                        <Button
+                        {lists.find(l => l.id === selectedListId)?.userId === auth.currentUser.uid && (
+
+                            <Button
                             onPress={() => {
                                 setActionVisible(false);
                                 setEditVisible(true);
@@ -175,25 +184,29 @@ export default function HomeScreen({ navigation }) {
                         >
                             Átnevezés
                         </Button>
+                        )}
 
                         <Button
                             onPress={() => {
                                 setActionVisible(false);
-                                alert('TODO');
+                                setSharingList(lists.find(l => l.id === selectedListId));
+                                setShareVisible(true);
                             }}
                         >
                             Megosztás
                         </Button>
 
-                        <Button
-                            textColor="red"
-                            onPress={() => {
-                                setActionVisible(false);
-                                setDeleteVisible(true);
-                            }}
-                        >
-                            Törlés
-                        </Button>
+                        {lists.find(l => l.id === selectedListId)?.userId === auth.currentUser.uid && (
+                            <Button
+                                textColor="red"
+                                onPress={() => {
+                                    setActionVisible(false);
+                                    setDeleteVisible(true);
+                                }}
+                            >
+                                Törlés
+                            </Button>
+                        )}
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
@@ -223,6 +236,17 @@ export default function HomeScreen({ navigation }) {
                 style={styles.fab}
                 onPress={() => setVisible(true)}
             />
+            <Portal>
+                <ShareListModal
+                    visible={shareVisible}
+                    onDismiss={() => {
+                        setShareVisible(false);
+                        setSharingList(null);
+                    }}
+                    listId={selectedListId}
+                    members={lists.find(l => l.id === selectedListId)?.members ?? []}
+                />
+            </Portal>
         </SafeAreaView>
     );
 }
