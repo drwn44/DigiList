@@ -1,14 +1,13 @@
+import { Portal } from 'react-native-paper';
+import CategoryPicker from '../components/CategoryPicker';
 import { View, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
-import {Text, TextInput, Button, Card, Checkbox, FAB, IconButton} from 'react-native-paper';
-
+import {Text, TextInput, Button, Card, Checkbox, IconButton} from 'react-native-paper';
 import {doc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, Timestamp} from 'firebase/firestore';
 import { db } from '../firebase';
-
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 import EmptyState from "../components/EmptyState";
-
 
 export default function ListItemScreen({ route }) {
     const { listId, listName } = route.params;
@@ -19,6 +18,7 @@ export default function ListItemScreen({ route }) {
 
     const totalCount = items.length;
     const doneCount = items.filter(item => item.done).length;
+    const [categoryPickerVisible, setCategoryPickerVisible] = useState(false);
 
     useEffect(() => {
         const q = collection(db, 'lists', listId, 'items');
@@ -139,16 +139,33 @@ export default function ListItemScreen({ route }) {
                     onCancel={() => setDeleteVisible(false)}
                     onConfirm={confirmDeleteItem}
                 />
-                <TextInput
-                    label="Új elem"
-                    value={itemName}
-                    onChangeText={setItemName}
-                    style={{ marginVertical: 12 }}
-                />
-
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 12, gap: 8 }}>
+                    <TextInput
+                        label="Új elem"
+                        value={itemName}
+                        onChangeText={setItemName}
+                        style={{ flex: 1 }}
+                    />
+                    <IconButton
+                        icon="view-grid"
+                        mode="contained"
+                        onPress={() => setCategoryPickerVisible(true)}
+                    />
+                </View>
                 <Button mode="contained" onPress={addItem}>
                     Hozzáadás
                 </Button>
+
+                <Portal>
+                    <CategoryPicker
+                        visible={categoryPickerVisible}
+                        onCancel={() => setCategoryPickerVisible(false)}
+                        onSelectProduct={(name) => {
+                            setItemName(name);
+                            setCategoryPickerVisible(false);
+                        }}
+                    />
+                </Portal>
             </View>
         </SafeAreaView>
     );
