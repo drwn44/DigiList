@@ -2,6 +2,10 @@ export const CATEGORY_GROUPS = [
     {
         name: 'Tejtermékek',
         icon: '🥛',
+        categoryIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+            69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
+            81, 82, 83, 84, 105, 106, 107, 108, 109,
+            110, 111, 112, 113, 114, 115, 116, 117],
         subcategories: [
             'Pasztőrözött ESL tej, 2,8% zsírtart.', 'Pasztőrözött ESL tej, 1,5% zsírtart.',
             'UHT tej dobozban, 2,8% zsírtart.', 'UHT tej dobozban, 1,5% zsírtart.',
@@ -21,23 +25,27 @@ export const CATEGORY_GROUPS = [
     {
         name: 'Húsok',
         icon: '🥩',
+        categoryIds: [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+            26, 27, 64, 85, 86, 87, 88, 89, 90, 118, 119],
         subcategories: [
             'Sertéscomb', 'Sertéskaraj', 'Sertésoldalas', 'Sertéstarja',
             'Darált sertéshús', 'Darált marhahús', 'Fehérpecsenye', 'Marhalábszár',
             'Egész csirke és tyúk', 'Csirkemellfilé', 'Csirkecomb', 'Csirkeszárny',
             'Pulykamellfilé', 'Sertészsír', 'Virsli', 'Párizsi', 'Téliszalámi',
             'Pulykamell sonka', 'Sonka, sertéscombból', 'Szárazkolbász',
-            'Császárszalonna', 'Kolozsvári szalonna', 'Száraztészta',
+            'Császárszalonna', 'Kolozsvári szalonna',
         ],
     },
     {
         name: 'Halak',
         icon: '🐟',
+        categoryIds: [91, 92, 93],
         subcategories: ['Pontyszelet', 'Harcsafilé', 'Tengeri halfilé'],
     },
     {
         name: 'Zöldségek',
         icon: '🥦',
+        categoryIds: [34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 97, 98],
         subcategories: [
             'Paradicsom', 'Zöldpaprika', 'Sárgarépa', 'Petrezselyemgyökér',
             'Uborka', 'Fokhagyma', 'Vöröshagyma', 'Étkezési burgonya',
@@ -48,11 +56,13 @@ export const CATEGORY_GROUPS = [
     {
         name: 'Gyümölcsök',
         icon: '🍎',
+        categoryIds: [28, 29, 30, 31, 32, 33],
         subcategories: ['Alma', 'Körte', 'Földieper', 'Banán', 'Citrom', 'Narancs'],
     },
     {
         name: 'Pékáruk',
         icon: '🍞',
+        categoryIds: [46, 47, 48, 49, 50, 79, 80, 94],
         subcategories: [
             'Fehér kenyér, cipó és vekni', 'Félbarna kenyér, cipó és vekni',
             'Teljes kiőrlésű kenyér, cipó és vekni', 'Rozsos kenyér, cipó és vekni',
@@ -62,6 +72,7 @@ export const CATEGORY_GROUPS = [
     {
         name: 'Tojás & Olaj',
         icon: '🥚',
+        categoryIds: [14, 51, 120, 121],
         subcategories: [
             'Tojás', 'Étolaj, napraforgó', 'Extra szűz olívaolaj', 'Olívapogácsa olaj',
         ],
@@ -69,11 +80,13 @@ export const CATEGORY_GROUPS = [
     {
         name: 'Italok',
         icon: '🧃',
+        categoryIds: [61, 62, 67, 68],
         subcategories: ['Narancslé', 'Almalé', 'Ásványvíz', 'Növényi italok'],
     },
     {
         name: 'Kávé & Tea',
         icon: '☕',
+        categoryIds: [101, 102, 103, 104, 122],
         subcategories: [
             'Őrölt kávé', 'Szemes kávé', 'Tea',
             'Kakaópor 10-12% kakaóvajjal', 'Kakaópor 20-22% kakaóvajjal',
@@ -82,6 +95,8 @@ export const CATEGORY_GROUPS = [
     {
         name: 'Tartós élelmiszer',
         icon: '🛒',
+        categoryIds: [50, 52, 53, 54, 55, 56, 57, 58, 59, 60,
+            63, 95, 96, 99, 100],
         subcategories: [
             'Száraztészta', 'Finomliszt', 'Rétesliszt', 'Gluténmentes liszt',
             'Kristálycukor', 'Porcukor', 'Rizs', 'Lencse', 'Földimogyoró',
@@ -92,11 +107,15 @@ export const CATEGORY_GROUPS = [
     {
         name: 'Bébiétel',
         icon: '👶',
+        categoryIds: [123, 124, 125],
         subcategories: ['Pépes bébiétel', 'Tej- és gabonapép', 'Tápszer'],
     },
     {
         name: 'Tisztálkodás',
         icon: '🧴',
+        categoryIds: [138, 139, 140, 141, 142, 143, 144, 145,
+            146, 147, 148, 149, 150, 151, 152, 153,
+            154, 155, 156, 157, 158, 159, 160, 161, 162, 163],
         subcategories: [
             'Folyékony szappan', 'Szappan', 'Kézfertőtlenítő gél', 'Sampon',
             'Babasampon', 'Tusfürdő', 'Babatusfürdő és fürdető', 'Fogkrém',
@@ -110,6 +129,7 @@ export const CATEGORY_GROUPS = [
     {
         name: 'Háztartás',
         icon: '🧹',
+        categoryIds: [126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137],
         subcategories: [
             'Toalettpapír', 'Papír kéztörlő henger', 'Papír zsebkendő', 'Alufólia',
             'Mosópor', 'Folyékony mosószer', 'Mosókapszula', 'Öblítő',
