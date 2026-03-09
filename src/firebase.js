@@ -1,9 +1,12 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import Constants from 'expo-constants'
+
+const {extra} = Constants.expoConfig;
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBd_usMcHBVEfAgT4hMTSwwAZv0P683Fkw",
+    apiKey: extra.firebaseApiKey,
     authDomain: "digilist-19aa4.firebaseapp.com",
     projectId: "digilist-19aa4",
     storageBucket: "digilist-19aa4.firebasestorage.app",
