@@ -40,6 +40,8 @@ const run = async () => {
         quantity: String(row[6] || '').trim(),
         minPrice: parsePrice(row[7]),
         maxPrice: parsePrice(row[8]),
+        minUnitPrice: parsePrice(row[9]),
+        maxUnitPrice: parsePrice(row[10]),
     })).filter(p => p.name && p.categoryId > 0);
 
     console.log(`Products: ${products.length}`);
