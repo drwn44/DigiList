@@ -22,7 +22,6 @@ export default function PriceScreen() {
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
 
-    // Add to list state
     const [addToListVisible, setAddToListVisible] = useState(false);
     const [selectedStoreItem, setSelectedStoreItem] = useState(null);
     const [lists, setLists] = useState([]);
@@ -53,7 +52,8 @@ export default function PriceScreen() {
     const filteredGroups = useMemo(() => {
         if (!search.trim()) return CATEGORY_GROUPS;
         const lower = search.toLowerCase();
-        return CATEGORY_GROUPS.map(group => {
+        return CATEGORY_GROUPS
+            .map(group => {
                 const groupMatches = group.name.toLowerCase().includes(lower);
                 const matchingSubcategories = group.subcategories.filter(s =>
                     s.toLowerCase().includes(lower)
@@ -82,7 +82,7 @@ export default function PriceScreen() {
         if (!selectedCategory) return [];
         return Object.values(
             products
-                .filter(p => p.categoryId === selectedCategory.id)
+                .filter(p => p.categoryId === selectedCategory.id && p.minUnitPrice > 0)
                 .reduce((acc, p) => {
                     if (!acc[p.store]) {
                         acc[p.store] = {
@@ -322,13 +322,13 @@ export default function PriceScreen() {
                                             </View>
 
                                             <View style={{ alignItems: 'flex-end', gap: 4 }}>
-s                                                <Text
+                                                <Text
                                                     variant="titleMedium"
                                                     style={{
                                                         color: item.store === cheapestStore ? '#2E7D32' : '#000',
                                                         fontWeight: item.store === cheapestStore ? 'bold' : 'normal',
-                                                    }}
-                                                >
+                                                    }}>
+
                                                     {item.minPrice === item.maxPrice
                                                         ? formatPrice(item.minPrice)
                                                         : `${formatPrice(item.minPrice)}–${formatPrice(item.maxPrice)}`
