@@ -27,7 +27,7 @@ export default {
             favicon: "./assets/favicon.png"
         },
         extra: {
-            firebaseApiKey: process.env.FIREBASE_API_KEY,
+            groqApiKey: process.env.GROQ_API_KEY,
         }
     }
 };

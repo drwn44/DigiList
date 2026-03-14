@@ -3,6 +3,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ListStack from './ListStack';
 import LoyaltyCardsScreen from '../screens/LoyaltyCardsScreen';
 import PriceScreen from "../screens/PriceScreen";
+import RecipeScreen from "../screens/RecipeScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -30,6 +31,16 @@ export default function AppTabs() {
                 options={{
                     tabBarIcon: ({ color, size }) => (
                         <MaterialCommunityIcons name="tag-search" color={color} size={size} />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="Receptek"
+                component={RecipeScreen}
+                options={{
+                    tabBarIcon: ({ color, size }) => (
+                        <MaterialCommunityIcons name="chef-hat" color={color} size={size} />
                     ),
                 }}
             />
