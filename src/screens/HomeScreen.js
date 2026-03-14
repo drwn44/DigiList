@@ -2,7 +2,18 @@ import {FlatList} from 'react-native';
 import ShareListModal from '../components/ShareListModal';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {auth, db} from '../firebase.js';
-import {addDoc, collection, deleteDoc, doc, onSnapshot, query, Timestamp, updateDoc, where} from 'firebase/firestore';
+import {
+    addDoc,
+    collection,
+    deleteDoc,
+    doc,
+    getDocs,
+    onSnapshot,
+    query,
+    Timestamp,
+    updateDoc,
+    where
+} from 'firebase/firestore';
 import {useEffect, useState} from "react";
 import {Button, Card, Dialog, FAB, IconButton, Modal, Portal, Text, TextInput} from "react-native-paper";
 import {homeStyles as styles} from '../styles/homeStyles';
@@ -60,7 +71,11 @@ export default function HomeScreen({ navigation }) {
     };
 
     const confirmDelete = async () => {
+        const itemsRef = collection(db, 'lists', selectedListId, 'items');
+        const itemsSnapshot = await getDocs(itemsRef);
+        await Promise.all(itemsSnapshot.docs.map(d => deleteDoc(d.ref)));
         await deleteDoc(doc(db, 'lists', selectedListId));
+
         setDeleteVisible(false);
         setSelectedListId(null);
     };
