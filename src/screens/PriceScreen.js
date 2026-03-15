@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import {useState, useMemo, useEffect} from 'react';
 import { View, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Card, ActivityIndicator, IconButton, Searchbar, Button, Dialog, Portal, RadioButton, Snackbar } from 'react-native-paper';
@@ -38,7 +38,7 @@ export default function PriceScreen() {
             .join(', ') + ` ${unit}`;
     };
 
-    useState(() => {
+    useEffect(() => {
         if (!auth.currentUser) return;
         const q = query(
             collection(db, 'lists'),
