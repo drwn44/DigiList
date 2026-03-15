@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { View, ScrollView } from 'react-native';
-import { Text, Button, TextInput, Divider, Snackbar } from 'react-native-paper';
+import {Text, Button, TextInput, Divider, Snackbar, HelperText} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import {getAuthErrorMessage} from "../utils/authErrors";
 
 export default function ProfileScreen({ onClose }) {
     const user = auth.currentUser;
@@ -16,6 +17,8 @@ export default function ProfileScreen({ onClose }) {
     const [nameLoading, setNameLoading] = useState(false);
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [currentPasswordError, setCurrentPasswordError] = useState('');
+    const [newPasswordError, setNewPasswordError] = useState('');
 
     const showSnackbar = (message) => {
         setSnackbarMessage(message);
@@ -29,14 +32,17 @@ export default function ProfileScreen({ onClose }) {
             await updateProfile(user, { displayName: displayName.trim() });
             await updateDoc(doc(db, 'users', user.uid), { displayName: displayName.trim() });
             showSnackbar('Név sikeresen frissítve!');
-        } catch (e) {
-            showSnackbar('Hiba történt: ' + e.message);
+        } catch (exc) {
+            showSnackbar('Hiba történt: ' + exc.message);
         } finally {
             setNameLoading(false);
         }
     };
 
     const changePassword = async () => {
+        setCurrentPasswordError('');
+        setNewPasswordError('');
+
         if (!currentPassword || !newPassword) {
             showSnackbar('Minden mező kitöltése kötelező!');
             return;
@@ -53,11 +59,13 @@ export default function ProfileScreen({ onClose }) {
             setCurrentPassword('');
             setNewPassword('');
             showSnackbar('Jelszó sikeresen megváltoztatva!');
-        } catch (e) {
-            if (e.code === 'auth/wrong-password') {
-                showSnackbar('Hibás jelenlegi jelszó!');
+        } catch (exc) {
+            if (exc.code === 'auth/wrong-password' || exc.code === 'auth/invalid-credential') {
+                setCurrentPasswordError('Hibás jelenlegi jelszó');
+            } else if (exc.code === 'auth/weak-password') {
+                setNewPasswordError(getAuthErrorMessage(exc.code));
             } else {
-                showSnackbar('Hiba történt: ' + e.message);
+                setCurrentPasswordError(getAuthErrorMessage(exc.code));
             }
         } finally {
             setPasswordLoading(false);
@@ -117,17 +125,29 @@ export default function ProfileScreen({ onClose }) {
                     <TextInput
                         label="Jelenlegi jelszó"
                         value={currentPassword}
-                        onChangeText={setCurrentPassword}
-                        importantForAutofill="no"
+                        onChangeText={(val) => { setCurrentPassword(val); setCurrentPasswordError(''); }}
                         secureTextEntry
+                        importantForAutofill="no"
+                        error={!!currentPasswordError}
                     />
+
+                    <HelperText type="error" visible={!!currentPasswordError}>
+                        {currentPasswordError}
+                    </HelperText>
+
                     <TextInput
                         label="Új jelszó"
                         value={newPassword}
-                        onChangeText={setNewPassword}
-                        importantForAutofill="no"
+                        onChangeText={(val) => { setNewPassword(val); setNewPasswordError(''); }}
                         secureTextEntry
+                        importantForAutofill="no"
+                        error={!!newPasswordError}
+
                     />
+                    <HelperText type="error" visible={!!newPasswordError}>
+                        {newPasswordError}
+                    </HelperText>
+
                     <Button
                         mode="contained"
                         onPress={changePassword}

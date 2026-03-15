@@ -1,20 +1,23 @@
 import { View } from 'react-native';
-import { Text, TextInput, Button } from 'react-native-paper';
+import {Text, TextInput, Button, HelperText} from 'react-native-paper';
 import { useState } from 'react';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { setDoc, doc, Timestamp } from 'firebase/firestore';
 import {auth, db} from '../firebase';
 import { authStyles as styles } from '../styles/authStyles';
+import {getAuthErrorMessage} from "../utils/authErrors";
 
 export default function RegisterScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [displayName, setDisplayName] = useState('');
+    const [error, setError] = useState('');
 
     const register = async () => {
+        setError('');
         if (!displayName || !email || !password) {
-            alert('Minden mező kitöltése kötelező');
+            setError('Minden mező kitöltése kötelező!')
             return;
         }
         try {
@@ -27,8 +30,8 @@ export default function RegisterScreen({ navigation }) {
                 email: userCredential.user.email.toLowerCase(),
                 createdAt: Timestamp.now(),
             });
-        } catch (e) {
-            alert(e.message);
+        } catch (exc) {
+            setError(getAuthErrorMessage(exc.code))
         } finally {
             setLoading(false);
         }
@@ -55,6 +58,7 @@ export default function RegisterScreen({ navigation }) {
                 autoCapitalize="none"
                 keyboardType="email-address"
                 style={styles.input}
+                error={!!error}
             />
 
             <TextInput
@@ -63,7 +67,12 @@ export default function RegisterScreen({ navigation }) {
                 onChangeText={setPassword}
                 secureTextEntry
                 style={styles.input}
+                error={!!error}
             />
+
+            <HelperText type="error" visible={!!error}>
+                {error}
+            </HelperText>
 
             <Button
                 mode="contained"

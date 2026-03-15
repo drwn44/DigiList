@@ -1,26 +1,29 @@
 import { View } from 'react-native';
-import { Text, TextInput, Button } from 'react-native-paper';
+import {Text, TextInput, Button, HelperText} from 'react-native-paper';
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { authStyles as styles } from '../styles/authStyles';
+import {getAuthErrorMessage} from "../utils/authErrors";
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const login = async () => {
+        setError('')
         if (!email || !password) {
-            alert('Email és jelszó megadása kötelező');
+            setError('Email és jelszó megadása kötelező!');
             return;
         }
 
         try {
             setLoading(true);
             await signInWithEmailAndPassword(auth, email, password);
-        } catch (e) {
-            alert(e.message);
+        } catch (exc) {
+            setError(getAuthErrorMessage(exc.code));
         } finally {
             setLoading(false);
         }
@@ -39,6 +42,7 @@ export default function LoginScreen({ navigation }) {
                 autoCapitalize="none"
                 keyboardType="email-address"
                 style={styles.input}
+                error={!!error}
             />
 
             <TextInput
@@ -47,7 +51,12 @@ export default function LoginScreen({ navigation }) {
                 onChangeText={setPassword}
                 secureTextEntry
                 style={styles.input}
+                error={!!error}
             />
+
+            <HelperText type="error" visible={!!error}>
+                {error}
+            </HelperText>
 
             <Button
                 mode="contained"
