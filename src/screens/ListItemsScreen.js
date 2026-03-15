@@ -1,11 +1,10 @@
-import {Chip, Portal} from 'react-native-paper';
+import {Button, Card, Checkbox, Chip, IconButton, Portal, Text, TextInput} from 'react-native-paper';
 import CategoryPicker from '../components/CategoryPicker';
-import {View, FlatList, ScrollView} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState } from 'react';
-import {Text, TextInput, Button, Card, Checkbox, IconButton} from 'react-native-paper';
-import {doc, collection, addDoc, updateDoc, deleteDoc, onSnapshot, Timestamp} from 'firebase/firestore';
-import { db } from '../firebase';
+import {FlatList, ScrollView, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {useEffect, useState} from 'react';
+import {addDoc, collection, deleteDoc, doc, onSnapshot, Timestamp, updateDoc} from 'firebase/firestore';
+import {db} from '../firebase';
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 import EmptyState from "../components/EmptyState";
 
@@ -28,7 +27,7 @@ export default function ListItemScreen({ route }) {
     useEffect(() => {
         const q = collection(db, 'lists', listId, 'items');
 
-        const unsubscribe = onSnapshot(q, async (snapshot) => {
+        return onSnapshot(q, async (snapshot) => {
             const data = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
@@ -45,8 +44,6 @@ export default function ListItemScreen({ route }) {
                 completed: allDone,
             });
         });
-
-        return unsubscribe;
     }, [listId]);
 
     const addItem = async () => {

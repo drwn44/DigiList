@@ -19,8 +19,6 @@ import {Button, Card, Dialog, FAB, IconButton, Modal, Portal, Text, TextInput} f
 import {homeStyles as styles} from '../styles/homeStyles';
 import EmptyState from "../components/EmptyState";
 import AppHeader from '../components/AppHeader';
-import LogoutConfirmDialog from "../components/LogoutConfirmDialog";
-
 
 export default function HomeScreen({ navigation }) {
 
@@ -33,7 +31,6 @@ export default function HomeScreen({ navigation }) {
     const [editVisible, setEditVisible] = useState(false);
     const [editingListId, setEditingListId] = useState(null);
 
-    const [logoutVisible, setLogoutVisible] = useState(false);
     const [actionVisible, setActionVisible] = useState(false);
 
     const [shareVisible, setShareVisible] = useState(false);
@@ -95,7 +92,7 @@ export default function HomeScreen({ navigation }) {
 
     return (
         <SafeAreaView style={styles.container}>
-            <AppHeader title="Bevásárlólisták" onLogoutPress={() => setLogoutVisible(true)}/>
+            <AppHeader title="Bevásárlólisták"/>
             <FlatList
                 contentContainerStyle={{ padding: 16, paddingBottom: 96, flexGrow: lists.length === 0 ? 1 : 0 }}
                 data={lists}
@@ -138,14 +135,7 @@ export default function HomeScreen({ navigation }) {
 
                 )}
             />
-            <LogoutConfirmDialog
-                visible={logoutVisible}
-                onCancel={() => setLogoutVisible(false)}
-                onConfirm={async () => {
-                    setLogoutVisible(false);
-                    await auth.signOut();
-                }}
-            />
+
             <Portal>
                 <Modal visible={visible} onDismiss={() => setVisible(false)}>
                     <Card style={{ margin: 16, padding: 16 }}>

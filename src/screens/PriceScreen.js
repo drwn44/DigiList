@@ -6,7 +6,6 @@ import { collection, addDoc, query, where, onSnapshot, Timestamp } from 'firebas
 import { TextInput } from 'react-native-paper';
 import { auth, db } from '../firebase';
 import AppHeader from '../components/AppHeader';
-import LogoutConfirmDialog from '../components/LogoutConfirmDialog';
 import useProductData from '../hooks/useExcelPriceSheet';
 import { CATEGORY_GROUPS } from '../data/categoryGroups';
 import EmptyState from "../components/EmptyState";
@@ -15,7 +14,6 @@ const formatPrice = (val) => `${Math.round(val).toLocaleString('hu-HU')} Ft`;
 
 export default function PriceScreen() {
     const { products, loading, error } = useProductData();
-    const [logoutVisible, setLogoutVisible] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [search, setSearch] = useState('');
@@ -161,11 +159,7 @@ export default function PriceScreen() {
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <AppHeader
-                title="Árak összehasonlítása"
-                onLogoutPress={() => setLogoutVisible(true)}
-            />
-
+            <AppHeader title="Árak összehasonlítása"/>
             {loading ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 }}>
                     <ActivityIndicator size="large" />
@@ -414,14 +408,6 @@ export default function PriceScreen() {
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
-
-            <LogoutConfirmDialog
-                visible={logoutVisible}
-                onCancel={() => setLogoutVisible(false)}
-                onConfirm={async () => {
-                    setLogoutVisible(false);
-                    await auth.signOut();
-                }}/>
 
             <Snackbar
                 visible={snackbarVisible}

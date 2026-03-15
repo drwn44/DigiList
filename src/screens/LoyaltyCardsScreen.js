@@ -8,7 +8,6 @@ import { auth, db } from '../firebase';
 import { collection, addDoc, deleteDoc, doc, onSnapshot, Timestamp } from 'firebase/firestore';
 import AppHeader from '../components/AppHeader';
 import EmptyState from '../components/EmptyState';
-import LogoutConfirmDialog from '../components/LogoutConfirmDialog';
 
 export default function LoyaltyCardsScreen() {
     const [cards, setCards] = useState([]);
@@ -20,7 +19,6 @@ export default function LoyaltyCardsScreen() {
     const [cardName, setCardName] = useState('');
     const [barcodeValue, setBarcodeValue] = useState('');
     const [barcodeFormat, setBarcodeFormat] = useState('');
-    const [logoutVisible, setLogoutVisible] = useState(false);
     const [fabOpen, setFabOpen] = useState(false);
     const [scanned, setScanned] = useState(false);
     const [scannedData, setScannedData] = useState(null);
@@ -94,7 +92,7 @@ export default function LoyaltyCardsScreen() {
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <AppHeader title="Hűségkártyák" onLogoutPress={() => setLogoutVisible(true)} />
+            <AppHeader title="Hűségkártyák"/>
 
             <FlatList
                 contentContainerStyle={{ padding: 16, paddingBottom: 96, flexGrow: cards.length === 0 ? 1 : 0 }}
@@ -301,15 +299,6 @@ export default function LoyaltyCardsScreen() {
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
-
-            <LogoutConfirmDialog
-                visible={logoutVisible}
-                onCancel={() => setLogoutVisible(false)}
-                onConfirm={async () => {
-                    setLogoutVisible(false);
-                    await auth.signOut();
-                }}
-            />
 
             <FAB.Group
                 open={fabOpen}

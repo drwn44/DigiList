@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, TextInput, Button, Card, ActivityIndicator, Portal, Dialog, RadioButton, Snackbar, IconButton, Divider } from 'react-native-paper';
-import { collection, addDoc, query, where, onSnapshot, Timestamp, doc, setDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, onSnapshot, Timestamp, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import AppHeader from '../components/AppHeader';
-import LogoutConfirmDialog from '../components/LogoutConfirmDialog';
 import Constants from 'expo-constants';
 
 const GROQ_API_KEY = Constants.expoConfig.extra.groqApiKey;
@@ -15,7 +14,6 @@ export default function RecipeScreen() {
     const [recipe, setRecipe] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [logoutVisible, setLogoutVisible] = useState(false);
     const [addToListVisible, setAddToListVisible] = useState(false);
     const [lists, setLists] = useState([]);
     const [selectedListId, setSelectedListId] = useState(null);
@@ -165,7 +163,7 @@ export default function RecipeScreen() {
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <AppHeader title="Recept generátor" onLogoutPress={() => setLogoutVisible(true)} />
+            <AppHeader title="Recept generátor"/>
 
             <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
 
@@ -400,15 +398,6 @@ export default function RecipeScreen() {
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
-
-            <LogoutConfirmDialog
-                visible={logoutVisible}
-                onCancel={() => setLogoutVisible(false)}
-                onConfirm={async () => {
-                    setLogoutVisible(false);
-                    await auth.signOut();
-                }}
-            />
 
             <Snackbar
                 visible={snackbarVisible}
