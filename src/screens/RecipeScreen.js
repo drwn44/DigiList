@@ -1,11 +1,9 @@
-import {useEffect, useState} from 'react';
-import { View, ScrollView, TouchableOpacity} from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, TextInput, Button, Card, ActivityIndicator, Portal, Dialog, RadioButton, Snackbar } from 'react-native-paper';
-
-import { collection, addDoc, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
+import { Text, TextInput, Button, Card, ActivityIndicator, Portal, Dialog, RadioButton, Snackbar, IconButton, Divider } from 'react-native-paper';
+import { collection, addDoc, query, where, onSnapshot, Timestamp, doc, setDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
-
 import AppHeader from '../components/AppHeader';
 import LogoutConfirmDialog from '../components/LogoutConfirmDialog';
 import Constants from 'expo-constants';
@@ -18,7 +16,6 @@ export default function RecipeScreen() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [logoutVisible, setLogoutVisible] = useState(false);
-
     const [addToListVisible, setAddToListVisible] = useState(false);
     const [lists, setLists] = useState([]);
     const [selectedListId, setSelectedListId] = useState(null);
@@ -26,6 +23,8 @@ export default function RecipeScreen() {
     const [creatingNew, setCreatingNew] = useState(false);
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [savedRecipes, setSavedRecipes] = useState([]);
+    const [savedRecipesExpanded, setSavedRecipesExpanded] = useState(false);
 
     useEffect(() => {
         if (!auth.currentUser) return;
@@ -33,11 +32,26 @@ export default function RecipeScreen() {
             collection(db, 'lists'),
             where('members', 'array-contains', auth.currentUser.uid)
         );
-        return onSnapshot(q, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
             setLists(data);
             if (data.length > 0) setSelectedListId(data[0].id);
         });
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        if (!auth.currentUser) return;
+        const unsubscribe = onSnapshot(
+            collection(db, 'users', auth.currentUser.uid, 'recipes'),
+            (snapshot) => {
+                const data = snapshot.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => b.savedAt?.seconds - a.savedAt?.seconds);
+                setSavedRecipes(data);
+            }
+        );
+        return () => unsubscribe();
     }, []);
 
     const generateRecipe = async () => {
@@ -67,8 +81,8 @@ export default function RecipeScreen() {
                                       "prepTime": "15 perc",
                                       "cookTime": "30 perc",
                                       "ingredients": [
-                                        { "name": "Csirkemell", "quantity": "500", "unit": "g" },
-                                        { "name": "Hagyma", "quantity": "2", "unit": "db" }
+                                        { "name": "Csirkemell", "quantity": "500", "unit": "g", "purchaseQuantity": "500", "purchaseUnit": "g" },
+                                        { "name": "Hagyma", "quantity": "2", "unit": "db", "purchaseQuantity": "1", "purchaseUnit": "háló" }
                                       ],
                                       "steps": [
                                         "Első lépés leírása",
@@ -93,9 +107,24 @@ export default function RecipeScreen() {
         }
     };
 
+    const saveRecipe = async () => {
+        if (!recipe || !auth.currentUser) return;
+        const recipeId = recipe.name.toLowerCase().replace(/\s+/g, '_');
+        await setDoc(doc(db, 'users', auth.currentUser.uid, 'recipes', recipeId), {
+            ...recipe,
+            savedAt: Timestamp.now(),
+        });
+
+        setSnackbarMessage(`"${recipe.name}" elmentve!`);
+        setSnackbarVisible(true);
+    };
+
+    const deleteSavedRecipe = async (recipeId) => {
+        await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'recipes', recipeId));
+    };
+
     const addIngredientsToList = async () => {
-        if (!recipe)
-            return;
+        if (!recipe) return;
 
         let targetListId = selectedListId;
 
@@ -118,8 +147,8 @@ export default function RecipeScreen() {
                 addDoc(collection(db, 'lists', targetListId, 'items'), {
                     name: ingredient.name,
                     done: false,
-                    quantity: parseFloat(ingredient.quantity) || 1,
-                    unit: ingredient.unit || 'db',
+                    quantity: parseFloat(ingredient.purchaseQuantity) || 1,
+                    unit: ingredient.purchaseUnit || 'db',
                     createdAt: Timestamp.now(),
                 })
             )
@@ -139,6 +168,58 @@ export default function RecipeScreen() {
             <AppHeader title="Recept generátor" onLogoutPress={() => setLogoutVisible(true)} />
 
             <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
+
+                {savedRecipes.length > 0 && (
+                    <Card style={{ marginBottom: 16 }}>
+                        <TouchableOpacity
+                            onPress={() => setSavedRecipesExpanded(e => !e)}
+                            style={{ flexDirection: 'row', alignItems: 'center', padding: 16 }}
+                        >
+                            <Text variant="titleMedium" style={{ flex: 1 }}>
+                                💾 Mentett receptek ({savedRecipes.length})
+                            </Text>
+                            <IconButton
+                                icon={savedRecipesExpanded ? 'chevron-up' : 'chevron-down'}
+                                size={20}
+                            />
+                        </TouchableOpacity>
+
+                        {savedRecipesExpanded && (
+                            <>
+                                <Divider />
+                                {savedRecipes.map((r, index) => (
+                                    <View key={r.id}>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setRecipe(r);
+                                                setDishName(r.name);
+                                                setSavedRecipesExpanded(false);
+                                            }}
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                paddingHorizontal: 16,
+                                                paddingVertical: 12,
+                                            }}
+                                        >
+                                            <Text variant="bodyMedium" style={{ flex: 1 }}>{r.name}</Text>
+                                            <Text variant="bodySmall" style={{ opacity: 0.4, marginRight: 4 }}>
+                                                {r.servings} adag
+                                            </Text>
+                                            <IconButton
+                                                icon="trash-can-outline"
+                                                size={18}
+                                                onPress={() => deleteSavedRecipe(r.id)}
+                                            />
+                                        </TouchableOpacity>
+                                        {index < savedRecipes.length - 1 && <Divider />}
+                                    </View>
+                                ))}
+                            </>
+                        )}
+                    </Card>
+                )}
+
                 <TextInput
                     label="Milyen ételt szeretnél főzni?"
                     value={dishName}
@@ -150,7 +231,8 @@ export default function RecipeScreen() {
                     onPress={generateRecipe}
                     loading={loading}
                     disabled={loading || !dishName.trim()}
-                    icon="chef-hat">
+                    icon="chef-hat"
+                >
                     Recept generálása
                 </Button>
 
@@ -171,14 +253,20 @@ export default function RecipeScreen() {
 
                 {recipe && !loading && (
                     <View style={{ marginTop: 24 }}>
-                        <Text variant="headlineMedium" style={{ fontWeight: 'bold', marginBottom: 4 }}>
-                            {recipe.name}
-                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                            <Text variant="headlineMedium" style={{ fontWeight: 'bold', flex: 1 }}>
+                                {recipe.name}
+                            </Text>
+                            <IconButton
+                                icon="content-save"
+                                size={24}
+                                onPress={saveRecipe}
+                            />
+                        </View>
                         <Text variant="bodySmall" style={{ opacity: 0.5, marginBottom: 16 }}>
                             {recipe.servings} adag · Előkészítés: {recipe.prepTime} · Főzés: {recipe.cookTime}
                         </Text>
 
-                        {/* Ingredients */}
                         <Card style={{ marginBottom: 16 }}>
                             <Card.Title title="Hozzávalók" />
                             <Card.Content>
@@ -225,8 +313,8 @@ export default function RecipeScreen() {
                                             flexDirection: 'row',
                                             marginBottom: 12,
                                             gap: 12,
-                                        }}>
-
+                                        }}
+                                    >
                                         <View style={{
                                             width: 28,
                                             height: 28,
@@ -325,7 +413,8 @@ export default function RecipeScreen() {
             <Snackbar
                 visible={snackbarVisible}
                 onDismiss={() => setSnackbarVisible(false)}
-                duration={3000}>
+                duration={3000}
+            >
                 {snackbarMessage}
             </Snackbar>
         </SafeAreaView>
