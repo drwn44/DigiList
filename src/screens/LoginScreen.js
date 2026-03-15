@@ -1,10 +1,11 @@
-import { View } from 'react-native';
 import {Text, TextInput, Button, HelperText} from 'react-native-paper';
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { authStyles as styles } from '../styles/authStyles';
 import {getAuthErrorMessage} from "../utils/authErrors";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
@@ -30,7 +31,11 @@ export default function LoginScreen({ navigation }) {
     };
 
     return (
-        <View style={styles.container}>
+        <KeyboardAwareScrollView
+            contentContainerStyle={styles.container}
+            enableOnAndroid={true}
+            keyboardShouldPersistTaps="handled"
+        >
             <Text variant="headlineMedium" style={styles.title}>
                 Bejelentkezés
             </Text>
@@ -73,6 +78,6 @@ export default function LoginScreen({ navigation }) {
             >
                 Nincs még fiókod? Regisztráció
             </Button>
-        </View>
+        </KeyboardAwareScrollView>
     );
 }

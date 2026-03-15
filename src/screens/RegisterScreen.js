@@ -1,4 +1,3 @@
-import { View } from 'react-native';
 import {Text, TextInput, Button, HelperText} from 'react-native-paper';
 import { useState } from 'react';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -6,6 +5,7 @@ import { setDoc, doc, Timestamp } from 'firebase/firestore';
 import {auth, db} from '../firebase';
 import { authStyles as styles } from '../styles/authStyles';
 import {getAuthErrorMessage} from "../utils/authErrors";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 export default function RegisterScreen({ navigation }) {
     const [email, setEmail] = useState('');
@@ -38,7 +38,11 @@ export default function RegisterScreen({ navigation }) {
     };
 
     return (
-        <View style={styles.container}>
+        <KeyboardAwareScrollView
+            contentContainerStyle={styles.container}
+            enableOnAndroid={true}
+            keyboardShouldPersistTaps="handled"
+        >
             <Text variant="headlineMedium" style={styles.title}>
                 Regisztráció
             </Text>
@@ -89,6 +93,6 @@ export default function RegisterScreen({ navigation }) {
             >
                 Vissza a belépéshez
             </Button>
-        </View>
+        </KeyboardAwareScrollView>
     );
 }
