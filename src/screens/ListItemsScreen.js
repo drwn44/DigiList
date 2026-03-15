@@ -33,16 +33,16 @@ export default function ListItemScreen({ route }) {
                 ...doc.data(),
             }));
             setItems(data);
-            if (data.length === 0) {
-                await updateDoc(doc(db, 'lists', listId), {
-                    completed: false,
-                });
-                return;
-            }
-            const allDone = data.every(item => item.done === true);
+
+            const totalCount = data.length;
+            const doneCount = data.filter(item => item.done).length;
+            const allDone = totalCount > 0 && doneCount === totalCount;
+
             await updateDoc(doc(db, 'lists', listId), {
                 completed: allDone,
-            });
+                itemCount: totalCount,
+                doneCount: doneCount,
+                });
         });
     }, [listId]);
 

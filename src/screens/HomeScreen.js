@@ -104,35 +104,38 @@ export default function HomeScreen({ navigation }) {
                     />
                 }
                 renderItem={({ item }) => (
-                    <Card style={{ marginBottom: 8, backgroundColor: item.completed ? '#E8F5E9' : '#FFFFFF', }}
-                          onPress={() =>
-                              navigation.navigate('ListItemsScreen', {
-                                  listId: item.id,
-                                  listName: item.name,
-                              })
-                          }
-                          onLongPress={() => {
-                              setSelectedListId(item.id);
-                              setEditingListId(item.id);
-                              setListName(item.name);
-                              setActionVisible(true);
-                          }}>
-                        <Card.Title
-                            title={item.name}
+                    <Card
+                        style={{marginBottom: 8, backgroundColor: item.completed ? '#E8F5E9' : '#FFFFFF',}}
+                        onPress={() => navigation.navigate('ListItemsScreen', {
+                            listId: item.id,
+                            listName: item.name,
+                        })}
+                        onLongPress={() => {
+                            setSelectedListId(item.id);
+                            setEditingListId(item.id);
+                            setListName(item.name);
+                            setActionVisible(true);
+                        }}
+                    >
+                        <Card.Title title={item.name}
+                            subtitle={
+                                item.itemCount > 0
+                                    ? `${item.doneCount ?? 0} / ${item.itemCount} elem`
+                                    : 'Üres lista'
+                            }
+                            subtitleStyle={{
+                                color: item.completed ? '#2E7D32' : undefined,
+                                opacity: 0.6,
+                            }}
                             right={(props) => (
-                                <>
-                                    {item.completed && (
-                                        <IconButton
-                                            {...props}
-                                            icon="check-circle"
-                                            iconColor="#2E7D32"
-                                        />
-                                    )}
-                                </>
+                                item.completed
+                                    ? <IconButton {...props} icon="check-circle" iconColor="#2E7D32" />
+                                    : item.members?.length > 1
+                                        ? <IconButton {...props} icon="account-multiple" iconColor="#6200ee" />
+                                        : null
                             )}
                         />
                     </Card>
-
                 )}
             />
 
