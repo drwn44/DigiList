@@ -80,13 +80,18 @@ export default function RecipeScreen() {
                                       "cookTime": "30 perc",
                                       "ingredients": [
                                         { "name": "Csirkemell", "quantity": "500", "unit": "g", "purchaseQuantity": "500", "purchaseUnit": "g" },
-                                        { "name": "Hagyma", "quantity": "2", "unit": "db", "purchaseQuantity": "1", "purchaseUnit": "háló" }
+                                        { "name": "Hagyma", "quantity": "2", "unit": "db", "purchaseQuantity": "500", "purchaseUnit": "g" }
                                       ],
                                       "steps": [
                                         "Első lépés leírása",
                                         "Második lépés leírása"
                                       ]
-                                    }`
+                                    }
+                                    
+                                    Fontos: a "purchaseUnit" mezőben CSAK ezek az értékek szerepelhetnek: db, kg, g, l, dl, ml, csomag, karton.
+                                    A "unit" mezőben bármilyen mértékegység szerepelhet (pl. evőkanál, teáskanál, csepp, marék, gerezd, stb.)
+                                    Ha a recept sütést vagy főzést igényel, minden lépésnél ahol hőmérséklet szükséges, tüntesd fel a pontos hőfokot Celsius-ban (pl. "180°C-on süsd 30 percig").`
+
                         }
                     ],
                     temperature: 0.7,
