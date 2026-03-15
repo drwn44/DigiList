@@ -1,0 +1,163 @@
+import { useState } from 'react';
+import { View, ScrollView } from 'react-native';
+import { Text, Button, TextInput, Divider, Snackbar } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
+import { doc, updateDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
+
+export default function ProfileScreen({ onClose }) {
+    const user = auth.currentUser;
+
+    const [displayName, setDisplayName] = useState(user?.displayName || '');
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [passwordLoading, setPasswordLoading] = useState(false);
+    const [nameLoading, setNameLoading] = useState(false);
+    const [snackbarVisible, setSnackbarVisible] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+
+    const showSnackbar = (message) => {
+        setSnackbarMessage(message);
+        setSnackbarVisible(true);
+    };
+
+    const saveName = async () => {
+        if (!displayName.trim()) return;
+        setNameLoading(true);
+        try {
+            await updateProfile(user, { displayName: displayName.trim() });
+            await updateDoc(doc(db, 'users', user.uid), { displayName: displayName.trim() });
+            showSnackbar('Név sikeresen frissítve!');
+        } catch (e) {
+            showSnackbar('Hiba történt: ' + e.message);
+        } finally {
+            setNameLoading(false);
+        }
+    };
+
+    const changePassword = async () => {
+        if (!currentPassword || !newPassword) {
+            showSnackbar('Minden mező kitöltése kötelező!');
+            return;
+        }
+        if(newPassword === currentPassword) {
+            showSnackbar('Az új és a régi jelszó nem egyezhet meg!')
+            return;
+        }
+        setPasswordLoading(true);
+        try {
+            const credential = EmailAuthProvider.credential(user.email, currentPassword);
+            await reauthenticateWithCredential(user, credential);
+            await updatePassword(user, newPassword);
+            setCurrentPassword('');
+            setNewPassword('');
+            showSnackbar('Jelszó sikeresen megváltoztatva!');
+        } catch (e) {
+            if (e.code === 'auth/wrong-password') {
+                showSnackbar('Hibás jelenlegi jelszó!');
+            } else {
+                showSnackbar('Hiba történt: ' + e.message);
+            }
+        } finally {
+            setPasswordLoading(false);
+        }
+    };
+
+    return (
+        <SafeAreaView style={{ flex: 1 }}>
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingHorizontal: 16,
+                paddingTop: 15,
+                paddingBottom: 15,
+                borderBottomWidth: 2,
+                borderBottomColor: '#eee',
+            }}>
+                <Text variant="headlineSmall" style={{ flex: 1, fontWeight: 'bold' }}>
+                    Profil
+                </Text>
+                <Button onPress={onClose}>Bezárás</Button>
+            </View>
+
+            <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
+
+                <View>
+                    <Text variant="bodySmall" style={{ opacity: 0.5, marginBottom: 4 }}>
+                        Email
+                    </Text>
+                    <Text variant="bodyLarge">{user?.email}</Text>
+                </View>
+
+                <Divider/>
+
+                <View style={{ gap: 8 }}>
+                    <Text variant="titleMedium">Megjelenített név</Text>
+                    <TextInput
+                        label="Név"
+                        value={displayName}
+                        onChangeText={setDisplayName}
+                        autoCapitalize="words"
+                    />
+                    <Button
+                        mode="contained"
+                        onPress={saveName}
+                        loading={nameLoading}
+                        disabled={nameLoading || displayName.trim() === user?.displayName}
+                    >
+                        Név mentése
+                    </Button>
+                </View>
+
+                <Divider/>
+
+                <View style={{ gap: 8 }}>
+                    <Text variant="titleMedium">Jelszó megváltoztatása</Text>
+                    <TextInput
+                        label="Jelenlegi jelszó"
+                        value={currentPassword}
+                        onChangeText={setCurrentPassword}
+                        importantForAutofill="no"
+                        secureTextEntry
+                    />
+                    <TextInput
+                        label="Új jelszó"
+                        value={newPassword}
+                        onChangeText={setNewPassword}
+                        importantForAutofill="no"
+                        secureTextEntry
+                    />
+                    <Button
+                        mode="contained"
+                        onPress={changePassword}
+                        loading={passwordLoading}
+                        disabled={passwordLoading}
+                    >
+                        Jelszó megváltoztatása
+                    </Button>
+                </View>
+
+                <Divider/>
+
+                <Button
+                    mode="contained"
+                    buttonColor="#c62828"
+                    icon="logout"
+                    onPress={() => auth.signOut()}
+                >
+                    Kijelentkezés
+                </Button>
+
+            </ScrollView>
+
+            <Snackbar
+                visible={snackbarVisible}
+                onDismiss={() => setSnackbarVisible(false)}
+                duration={3000}
+            >
+                {snackbarMessage}
+            </Snackbar>
+        </SafeAreaView>
+    );
+}
