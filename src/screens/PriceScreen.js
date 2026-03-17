@@ -1,7 +1,19 @@
 import {useState, useMemo, useEffect} from 'react';
 import { View, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Card, ActivityIndicator, IconButton, Searchbar, Button, Dialog, Portal, RadioButton, Snackbar } from 'react-native-paper';
+import {
+    Text,
+    Card,
+    ActivityIndicator,
+    IconButton,
+    Searchbar,
+    Button,
+    Dialog,
+    Portal,
+    RadioButton,
+    Snackbar,
+    useTheme
+} from 'react-native-paper';
 import { collection, addDoc, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
 import { TextInput } from 'react-native-paper';
 import { auth, db } from '../firebase';
@@ -12,6 +24,17 @@ import EmptyState from "../components/EmptyState";
 
 const formatPrice = (val) => `${Math.round(val).toLocaleString('hu-HU')} Ft`;
 
+const STORE_COLORS = {
+    'Tesco': '#003594',
+    'Aldi': '#00005f',
+    'Lidl': '#0050aa',
+    'Spar': '#007a33',
+    'Auchan': '#e2001a',
+    'Penny': '#cc0000',
+    'Müller': '#e2001a',
+    'dm': '#e2001a',
+};
+
 export default function PriceScreen() {
     const { products, loading, error } = useProductData();
     const [selectedGroup, setSelectedGroup] = useState(null);
@@ -19,13 +42,13 @@ export default function PriceScreen() {
     const [search, setSearch] = useState('');
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
-
     const [addToListVisible, setAddToListVisible] = useState(false);
     const [selectedStoreItem, setSelectedStoreItem] = useState(null);
     const [lists, setLists] = useState([]);
     const [selectedListId, setSelectedListId] = useState(null);
     const [newListName, setNewListName] = useState('');
     const [creatingNew, setCreatingNew] = useState(false);
+    const theme = useTheme();
 
     const formatQuantities = (quantities, unit) => {
         return [...quantities]
@@ -169,7 +192,7 @@ export default function PriceScreen() {
                 </View>
             ) : error ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, gap: 12 }}>
-                    <Text style={{ color: 'red', textAlign: 'center' }}>{error}</Text>
+                    <Text style={{ color: theme.colors.error, textAlign: 'center' }}>{error}</Text>
                 </View>
             ) : (
                 <View style={{ flex: 1 }}>
@@ -179,7 +202,7 @@ export default function PriceScreen() {
                             alignItems: 'center',
                             paddingHorizontal: 8,
                             borderBottomWidth: 1,
-                            borderBottomColor: '#eee',
+                            borderBottomColor: theme.colors.surfaceVariant,
                         }}>
                             <IconButton icon="arrow-left" onPress={handleBack} />
                             <Text variant="bodyMedium" style={{ opacity: 0.6, flex: 1 }}>
@@ -216,7 +239,7 @@ export default function PriceScreen() {
                                         style={{
                                             flexDirection: 'row',
                                             alignItems: 'center',
-                                            backgroundColor: '#fff',
+                                            backgroundColor: theme.colors.surface,
                                             borderRadius: 12,
                                             padding: 16,
                                             marginBottom: 8,
@@ -251,7 +274,7 @@ export default function PriceScreen() {
                                     style={{
                                         flexDirection: 'row',
                                         alignItems: 'center',
-                                        backgroundColor: '#fff',
+                                        backgroundColor: theme.colors.surface,
                                         borderRadius: 12,
                                         padding: 16,
                                         marginBottom: 8,
@@ -282,7 +305,9 @@ export default function PriceScreen() {
                                     key={item.store}
                                     style={{
                                         marginBottom: 8,
-                                        backgroundColor: item.store === cheapestStore ? '#E8F5E9' : '#fff',
+                                        backgroundColor: item.store === cheapestStore ? theme.colors.primaryContainer : theme.colors.surface,
+                                        borderLeftWidth: 4,
+                                        borderLeftColor: STORE_COLORS[item.store] ?? theme.colors.outline,
                                     }}>
 
                                     <Card.Content>
@@ -290,11 +315,15 @@ export default function PriceScreen() {
                                             <View style={{ flex: 1 }}>
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                                                     {index === 0 && <Text style={{ fontSize: 16 }}>🥇</Text>}
+                                                    <View style={{
+                                                        width: 10, height: 10, borderRadius: 5,
+                                                        backgroundColor: STORE_COLORS[item.store] ?? theme.colors.outline,
+                                                    }}/>
                                                     <Text
                                                         variant="titleMedium"
                                                         style={{
                                                             fontWeight: item.store === cheapestStore ? 'bold' : 'normal',
-                                                            color: item.store === cheapestStore ? '#2E7D32' : '#000',
+                                                            color: item.store === cheapestStore ? theme.colors.primary : theme.colors.onSurface,
                                                         }}>
                                                         {item.store}
                                                     </Text>
@@ -306,7 +335,7 @@ export default function PriceScreen() {
 
                                                 <Text
                                                     variant="bodySmall"
-                                                    style={{ color: item.store === cheapestStore ? '#2E7D32' : '#666' }}
+                                                    style={{ color: item.store === cheapestStore ? theme.colors.primary : theme.colors.onSurfaceVariant }}
                                                 >
                                                     {item.minUnitPrice === item.maxUnitPrice
                                                         ? `${formatPrice(item.minUnitPrice)}/${item.unit}`
@@ -319,7 +348,7 @@ export default function PriceScreen() {
                                                 <Text
                                                     variant="titleMedium"
                                                     style={{
-                                                        color: item.store === cheapestStore ? '#2E7D32' : '#000',
+                                                        color: item.store === cheapestStore ? theme.colors.primary : theme.colors.onSurface,
                                                         fontWeight: item.store === cheapestStore ? 'bold' : 'normal',
                                                     }}>
 

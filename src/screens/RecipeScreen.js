@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, TextInput, Button, Card, ActivityIndicator, Portal, Dialog, RadioButton, Snackbar, IconButton, Divider } from 'react-native-paper';
-import { collection, addDoc, query, where, onSnapshot, Timestamp, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import {
+    Text, TextInput, Button, Card, ActivityIndicator, Portal, Dialog, RadioButton, Snackbar, IconButton, Divider,
+    useTheme
+} from 'react-native-paper';
+import { collection, addDoc, query, where, onSnapshot, Timestamp, doc, setDoc, deleteDoc, updateDoc, increment } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import AppHeader from '../components/AppHeader';
 import Constants from 'expo-constants';
@@ -23,6 +26,8 @@ export default function RecipeScreen() {
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [savedRecipes, setSavedRecipes] = useState([]);
     const [savedRecipesExpanded, setSavedRecipesExpanded] = useState(false);
+
+    const theme = useTheme();
 
     useEffect(() => {
         if (!auth.currentUser) return;
@@ -157,6 +162,19 @@ export default function RecipeScreen() {
             )
         );
 
+        if (creatingNew) {
+            await updateDoc(doc(db, 'lists', targetListId), {
+                itemCount: recipe.ingredients.length,
+                doneCount: 0,
+                completed: false,
+            });
+        } else{
+            await updateDoc(doc(db, 'lists', targetListId), {
+                itemCount: increment(recipe.ingredients.length),
+                completed: false
+            });
+        }
+
         const listName = creatingNew
             ? newListName
             : lists.find(l => l.id === targetListId)?.name;
@@ -240,7 +258,7 @@ export default function RecipeScreen() {
                 </Button>
 
                 {error ? (
-                    <Text style={{ color: 'red', marginTop: 12, textAlign: 'center' }}>
+                    <Text style={{ color: theme.colors.error, marginTop: 12, textAlign: 'center' }}>
                         {error}
                     </Text>
                 ) : null}
@@ -281,7 +299,7 @@ export default function RecipeScreen() {
                                             justifyContent: 'space-between',
                                             paddingVertical: 6,
                                             borderBottomWidth: index < recipe.ingredients.length - 1 ? 1 : 0,
-                                            borderBottomColor: '#f0f0f0',
+                                            borderBottomColor: theme.colors.surfaceVariant,
                                         }}
                                     >
                                         <Text variant="bodyMedium">{ing.name}</Text>
@@ -322,7 +340,7 @@ export default function RecipeScreen() {
                                             width: 28,
                                             height: 28,
                                             borderRadius: 14,
-                                            backgroundColor: '#6200ee',
+                                            backgroundColor: theme.colors.primary,
                                             justifyContent: 'center',
                                             alignItems: 'center',
                                         }}>

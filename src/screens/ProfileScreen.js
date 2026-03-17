@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { View, ScrollView } from 'react-native';
-import {Text, Button, TextInput, Divider, Snackbar, HelperText} from 'react-native-paper';
+import {Text, Button, TextInput, Divider, Snackbar, HelperText, useTheme} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import {getAuthErrorMessage} from "../utils/authErrors";
+import { Switch } from 'react-native-paper';
+import {useAppTheme} from "../styles/themeContext";
 
 export default function ProfileScreen({ onClose }) {
     const user = auth.currentUser;
@@ -19,6 +21,9 @@ export default function ProfileScreen({ onClose }) {
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [currentPasswordError, setCurrentPasswordError] = useState('');
     const [newPasswordError, setNewPasswordError] = useState('');
+
+    const theme = useTheme();
+    const { isDark, toggleTheme } = useAppTheme();
 
     const showSnackbar = (message) => {
         setSnackbarMessage(message);
@@ -73,7 +78,7 @@ export default function ProfileScreen({ onClose }) {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor:theme.colors.background }}>
             <View style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -81,7 +86,7 @@ export default function ProfileScreen({ onClose }) {
                 paddingTop: 15,
                 paddingBottom: 15,
                 borderBottomWidth: 2,
-                borderBottomColor: '#eee',
+                borderBottomColor: theme.colors.surfaceVariant,
             }}>
                 <Text variant="headlineSmall" style={{ flex: 1, fontWeight: 'bold' }}>
                     Profil
@@ -162,12 +167,20 @@ export default function ProfileScreen({ onClose }) {
 
                 <Button
                     mode="contained"
-                    buttonColor="#c62828"
+                    buttonColor={theme.colors.error}
                     icon="logout"
                     onPress={() => auth.signOut()}
                 >
                     Kijelentkezés
                 </Button>
+
+                <Divider/>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8 }}>
+                    <Text variant="titleMedium">Sötét mód</Text>
+                    <Switch value={isDark} onValueChange={toggleTheme} />
+                </View>
+
 
             </ScrollView>
 

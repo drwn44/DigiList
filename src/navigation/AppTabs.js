@@ -4,15 +4,23 @@ import ListStack from './ListStack';
 import LoyaltyCardsScreen from '../screens/LoyaltyCardsScreen';
 import PriceScreen from "../screens/PriceScreen";
 import RecipeScreen from "../screens/RecipeScreen";
+import {useTheme} from "react-native-paper";
 
 const Tab = createBottomTabNavigator();
 
 export default function AppTabs() {
+    const theme = useTheme();
+
     return (
         <Tab.Navigator
             screenOptions={{
                 headerShown: false,
-                tabBarActiveTintColor: '#6200ee',
+                tabBarActiveTintColor: theme.colors.primary,
+                tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+                tabBarStyle: {
+                    backgroundColor: theme.colors.surface,
+                    borderTopColor: theme.colors.surfaceVariant,
+                },
             }}
         >
             <Tab.Screen

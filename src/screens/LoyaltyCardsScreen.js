@@ -9,6 +9,8 @@ import { collection, addDoc, deleteDoc, doc, onSnapshot, Timestamp } from 'fireb
 import AppHeader from '../components/AppHeader';
 import EmptyState from '../components/EmptyState';
 
+import { useTheme } from 'react-native-paper';
+
 export default function LoyaltyCardsScreen() {
     const [cards, setCards] = useState([]);
     const [addVisible, setAddVisible] = useState(false);
@@ -33,6 +35,8 @@ export default function LoyaltyCardsScreen() {
             setCards(data);
         });
     }, []);
+
+    const theme = useTheme();
 
     const normalizeFormat = (format) => {
         if (!format) return 'CODE128';
@@ -93,7 +97,6 @@ export default function LoyaltyCardsScreen() {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <AppHeader title="Hűségkártyák"/>
-
             <FlatList
                 contentContainerStyle={{ padding: 16, paddingBottom: 96, flexGrow: cards.length === 0 ? 1 : 0 }}
                 data={cards}
@@ -106,7 +109,7 @@ export default function LoyaltyCardsScreen() {
                 }
                 renderItem={({ item }) => (
                     <Card
-                        style={{ marginBottom: 8 }}
+                        style={{ marginBottom: 8, backgroundColor: theme.colors.surface }}
                         onPress={() => setViewCard(item)}
                         onLongPress={() => {
                             setSelectedCardId(item.id);
@@ -136,8 +139,8 @@ export default function LoyaltyCardsScreen() {
                 animationType="slide"
                 onRequestClose={() => setViewCard(null)}
             >
-                <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-                    <View style={{ padding: 24, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#eee' }}>
+                <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background}}>
+                    <View style={{ padding: 24, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: theme.colors.surfaceVariant}}>
                         <Text variant="headlineMedium">{viewCard?.name}</Text>
                     </View>
 
@@ -199,7 +202,7 @@ export default function LoyaltyCardsScreen() {
                                     width: 260,
                                     height: 240,
                                     borderWidth: 4,
-                                    borderColor: scanned ? '#4CAF50' : 'white',
+                                    borderColor: scanned ? theme.colors.primary : 'white',
                                     borderRadius: 8,
                                     backgroundColor: 'transparent',
                                 }} />
@@ -295,7 +298,7 @@ export default function LoyaltyCardsScreen() {
                     </Dialog.Content>
                     <Dialog.Actions>
                         <Button onPress={() => setDeleteVisible(false)}>Mégse</Button>
-                        <Button onPress={confirmDelete} textColor="red">Törlés</Button>
+                        <Button onPress={confirmDelete} textColor={theme.colors.primary}>Törlés</Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>

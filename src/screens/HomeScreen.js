@@ -1,7 +1,7 @@
-import {FlatList} from 'react-native';
+import { FlatList } from 'react-native';
 import ShareListModal from '../components/ShareListModal';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {auth, db} from '../firebase.js';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { auth, db } from '../firebase.js';
 import {
     addDoc,
     collection,
@@ -14,42 +14,35 @@ import {
     updateDoc,
     where
 } from 'firebase/firestore';
-import {useEffect, useState} from "react";
-import {Button, Card, Dialog, FAB, IconButton, Modal, Portal, Text, TextInput} from "react-native-paper";
-import {homeStyles as styles} from '../styles/homeStyles';
+import { useEffect, useState } from "react";
+import { Button, Card, Dialog, FAB, IconButton, Modal, Portal, Text, TextInput, useTheme } from "react-native-paper";
+import { homeStyles as styles } from '../styles/homeStyles';
 import EmptyState from "../components/EmptyState";
 import AppHeader from '../components/AppHeader';
 
 export default function HomeScreen({ navigation }) {
+    const theme = useTheme();
 
     const [lists, setLists] = useState([]);
     const [visible, setVisible] = useState(false);
     const [listName, setListName] = useState('');
     const [deleteVisible, setDeleteVisible] = useState(false);
-
     const [selectedListId, setSelectedListId] = useState(null);
     const [editVisible, setEditVisible] = useState(false);
     const [editingListId, setEditingListId] = useState(null);
-
     const [actionVisible, setActionVisible] = useState(false);
-
     const [shareVisible, setShareVisible] = useState(false);
     const [sharingList, setSharingList] = useState(null);
 
     useEffect(() => {
-        if (!auth.currentUser) return;
-
+        if (!auth.currentUser)
+            return;
         const q = query(
             collection(db, 'lists'),
             where('members', 'array-contains', auth.currentUser.uid)
         );
-
         return onSnapshot(q, (snapshot) => {
-            const data = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            setLists(data);
+            setLists(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
         });
     }, []);
 
@@ -58,11 +51,10 @@ export default function HomeScreen({ navigation }) {
         await addDoc(collection(db, 'lists'), {
             name: listName,
             userId: auth.currentUser.uid,
-            members: [auth.currentUser.uid],  // 👈 add this
+            members: [auth.currentUser.uid],
             createdAt: Timestamp.now(),
             completed: false,
         });
-
         setListName('');
         setVisible(false);
     };
@@ -72,7 +64,6 @@ export default function HomeScreen({ navigation }) {
         const itemsSnapshot = await getDocs(itemsRef);
         await Promise.all(itemsSnapshot.docs.map(d => deleteDoc(d.ref)));
         await deleteDoc(doc(db, 'lists', selectedListId));
-
         setDeleteVisible(false);
         setSelectedListId(null);
     };
@@ -80,11 +71,9 @@ export default function HomeScreen({ navigation }) {
     const updateList = async () => {
         if (!listName.trim())
             return;
-
         await updateDoc(doc(db, 'lists', editingListId), {
             name: listName,
-        });
-
+            });
         setEditVisible(false);
         setEditingListId(null);
         setListName('');
@@ -105,7 +94,10 @@ export default function HomeScreen({ navigation }) {
                 }
                 renderItem={({ item }) => (
                     <Card
-                        style={{marginBottom: 8, backgroundColor: item.completed ? '#E8F5E9' : '#FFFFFF',}}
+                        style={{
+                            marginBottom: 8,
+                            backgroundColor: item.completed ? theme.colors.primaryContainer : theme.colors.surface,
+                        }}
                         onPress={() => navigation.navigate('ListItemsScreen', {
                             listId: item.id,
                             listName: item.name,
@@ -124,14 +116,13 @@ export default function HomeScreen({ navigation }) {
                                     : 'Üres lista'
                             }
                             subtitleStyle={{
-                                color: item.completed ? '#2E7D32' : undefined,
-                                opacity: 0.6,
+                                color: item.completed ? theme.colors.primary : theme.colors.onSurfaceVariant,
                             }}
                             right={(props) => (
                                 item.completed
-                                    ? <IconButton {...props} icon="check-circle" iconColor="#2E7D32" />
+                                    ? <IconButton {...props} icon="check-circle" iconColor={theme.colors.primary} />
                                     : item.members?.length > 1
-                                        ? <IconButton {...props} icon="account-multiple" iconColor="#6200ee" />
+                                        ? <IconButton {...props} icon="account-multiple" iconColor={theme.colors.secondary} />
                                         : null
                             )}
                         />
@@ -141,7 +132,7 @@ export default function HomeScreen({ navigation }) {
 
             <Portal>
                 <Modal visible={visible} onDismiss={() => setVisible(false)}>
-                    <Card style={{ margin: 16, padding: 16 }}>
+                    <Card style={{ margin: 16, padding: 16, backgroundColor: theme.colors.surface }}>
                         <Text variant="titleMedium" style={{ marginBottom: 12 }}>
                             Új lista
                         </Text>
@@ -158,6 +149,7 @@ export default function HomeScreen({ navigation }) {
                         </Button>
                     </Card>
                 </Modal>
+
                 <Dialog visible={deleteVisible} onDismiss={() => setDeleteVisible(false)}>
                     <Dialog.Title>Lista törlése</Dialog.Title>
                     <Dialog.Content>
@@ -165,52 +157,39 @@ export default function HomeScreen({ navigation }) {
                     </Dialog.Content>
 
                     <Dialog.Actions>
-                        <Button onPress={() => setDeleteVisible(false)}>
-                            Mégse
-                        </Button>
-                        <Button onPress={confirmDelete} textColor="red">
-                            Törlés
-                        </Button>
+                        <Button onPress={() => setDeleteVisible(false)}>Mégse</Button>
+                        <Button onPress={confirmDelete} textColor={theme.colors.error}>Törlés</Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
 
             <Portal>
-                <Dialog
-                    visible={actionVisible}
-                    onDismiss={() => setActionVisible(false)}
-                >
+                <Dialog visible={actionVisible} onDismiss={() => setActionVisible(false)}>
                     <Dialog.Title>Lista műveletek</Dialog.Title>
                     <Dialog.Actions>
                         {lists.find(l => l.id === selectedListId)?.userId === auth.currentUser.uid && (
-
                             <Button
-                            onPress={() => {
+                                onPress={() => {
                                 setActionVisible(false);
                                 setEditVisible(true);
                             }}
-                        >
-                            Átnevezés
-                        </Button>
+                            >
+                                Átnevezés
+                            </Button>
                         )}
-
-                        <Button
-                            onPress={() => {
-                                setActionVisible(false);
-                                setSharingList(lists.find(l => l.id === selectedListId));
-                                setShareVisible(true);
-                            }}
-                        >
+                        <Button onPress={() => {
+                            setActionVisible(false);
+                            setSharingList(lists.find(l => l.id === selectedListId));
+                            setShareVisible(true);
+                        }}>
                             Megosztás
                         </Button>
-
                         {lists.find(l => l.id === selectedListId)?.userId === auth.currentUser.uid && (
-                            <Button
-                                textColor="red"
-                                onPress={() => {
-                                    setActionVisible(false);
-                                    setDeleteVisible(true);
-                                }}
+                            <Button textColor={theme.colors.error}
+                                    onPress={() => {
+                                        setActionVisible(false);
+                                        setDeleteVisible(true);
+                                    }}
                             >
                                 Törlés
                             </Button>
@@ -221,29 +200,29 @@ export default function HomeScreen({ navigation }) {
 
             <Portal>
                 <Modal visible={editVisible} onDismiss={() => setEditVisible(false)}>
-                    <Card style={{ margin: 16, padding: 16 }}>
+                    <Card style={{ margin: 16, padding: 16, backgroundColor: theme.colors.surface }}>
                         <Text variant="titleMedium" style={{ marginBottom: 12 }}>
                             Lista átnevezése
                         </Text>
-
                         <TextInput
                             label="Új név"
                             value={listName}
                             onChangeText={setListName}
                             style={{ marginBottom: 12 }}
                         />
-
                         <Button mode="contained" onPress={updateList}>
                             Mentés
                         </Button>
                     </Card>
                 </Modal>
             </Portal>
+
             <FAB
                 icon="plus"
                 style={styles.fab}
                 onPress={() => setVisible(true)}
             />
+
             <Portal>
                 <ShareListModal
                     visible={shareVisible}
