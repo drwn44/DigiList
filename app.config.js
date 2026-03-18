@@ -8,6 +8,10 @@ export default {
         userInterfaceStyle: "light",
         newArchEnabled: true,
         scheme: "digilist",
+        plugins: [
+            "expo-camera",
+            "@react-native-google-signin/google-signin"
+        ],
         splash: {
             image: "./assets/splash-icon.png",
             resizeMode: "contain",
@@ -18,6 +22,7 @@ export default {
         },
         android: {
             package: "com.drwn.digilist",
+            googleServicesFile: "./google-services.json",
             adaptiveIcon: {
                 foregroundImage: "./assets/adaptive-icon.png",
                 backgroundColor: "#ffffff"
@@ -38,6 +43,7 @@ export default {
             firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
             firebaseAppId: process.env.FIREBASE_APP_ID,
             groqApiKey: process.env.GROQ_API_KEY,
+            googleWebClientId: process.env.GOOGLE_WEB_CLIENT_ID,
         }
     }
 };

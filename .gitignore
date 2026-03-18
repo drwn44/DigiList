@@ -38,6 +38,7 @@ yarn-error.*
 .env*.local
 .env
 eas.json
+google-services.json
 
 # typescript
 *.tsbuildinfo
