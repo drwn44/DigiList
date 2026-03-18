@@ -4,7 +4,8 @@ export const authStyles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        padding: 24,
+        padding: 16,
+        flexGrow: 1,
     },
     title: {
         textAlign: 'center',

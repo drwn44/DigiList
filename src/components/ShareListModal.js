@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { Modal, Card, Text, TextInput, IconButton, ActivityIndicator } from 'react-native-paper';
+import {Modal, Card, Text, TextInput, IconButton, ActivityIndicator, useTheme} from 'react-native-paper';
 import { collection, query, where, getDocs, updateDoc, doc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
@@ -9,6 +9,7 @@ export default function ShareListModal({ visible, onDismiss, listId, members = [
     const [memberDetails, setMemberDetails] = useState([]);
     const [loading, setLoading] = useState(false);
     const [addError, setAddError] = useState('');
+    const theme = useTheme();
 
     useEffect(() => {
         if (!visible || members.length === 0) return;
@@ -91,12 +92,11 @@ export default function ShareListModal({ visible, onDismiss, listId, members = [
 
     return (
         <Modal visible={visible} onDismiss={handleDismiss}>
-            <Card style={{ margin: 16, padding: 16 }}>
+            <Card style={{ margin: 16, padding: 16 , backgroundColor: theme.colors.surface}}>
                 <Text variant="titleMedium" style={{ marginBottom: 16 }}>
                     Lista megosztása
                 </Text>
 
-                {/* Email input row */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
                     <TextInput
                         label="Email cím"
@@ -116,13 +116,13 @@ export default function ShareListModal({ visible, onDismiss, listId, members = [
                 </View>
 
                 {addError ? (
-                    <Text style={{ color: 'red', marginBottom: 8, fontSize: 12 }}>
+                    <Text style={{ color: theme.colors.error, marginBottom: 8, fontSize: 12 }}>
                         {addError}
                     </Text>
                 ) : null}
 
                 <Text variant="labelLarge" style={{ marginTop: 12, marginBottom: 8 }}>
-                    Megosztva ezekkel:
+                    Megosztva velük:
                 </Text>
 
                 {memberDetails.map((member) => (

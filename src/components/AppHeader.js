@@ -9,7 +9,7 @@ export default function AppHeader({ title }) {
 
     return(
         <>
-            <Appbar.Header>
+            <Appbar.Header statusBarHeight={0}>
                 <Appbar.Content title={title} />
                 <Appbar.Action
                     icon="account-circle"
