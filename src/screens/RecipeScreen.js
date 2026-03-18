@@ -71,8 +71,12 @@ export default function RecipeScreen() {
                     'Authorization': `Bearer ${GROQ_API_KEY}`,
                 },
                 body: JSON.stringify({
-                    model: 'llama-3.3-70b-versatile',
+                    model: 'meta-llama/llama-4-scout-17b-16e-instruct',
                     messages: [
+                        {
+                            role: 'system',
+                            content: 'Te egy magyar szakács asszisztens vagy. Mindig magyarul válaszolj, és pontosan azt az ételt készítsd el, amit kérnek. Soha ne találj ki más ételt.'
+                        },
                         {
                             role: 'user',
                             content: `Készíts egy részletes magyar nyelvű receptet ehhez az ételhez: "${dishName}".
@@ -105,7 +109,8 @@ export default function RecipeScreen() {
 
             const data = await response.json();
             const text = data.choices[0].message.content.trim();
-            const parsed = JSON.parse(text);
+            const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            const parsed = JSON.parse(cleaned);
             setRecipe(parsed);
         } catch (e) {
             console.error(e);
