@@ -307,6 +307,7 @@ export default function LoyaltyCardsScreen() {
                 open={fabOpen}
                 visible
                 icon={fabOpen ? 'close' : 'plus'}
+                style={{marginBottom: -40}}
                 actions={[
                     {
                         icon: 'camera',

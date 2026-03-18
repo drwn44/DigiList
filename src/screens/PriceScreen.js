@@ -1,5 +1,5 @@
 import {useState, useMemo, useEffect} from 'react';
-import { View, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import {View, FlatList, TouchableOpacity, ScrollView, BackHandler} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
     Text,
@@ -58,6 +58,24 @@ export default function PriceScreen() {
             .map(q => Number.isInteger(q) ? `${q}` : `${q}`)
             .join(', ') + ` ${unit}`;
     };
+
+    useEffect(() => {
+        const onBackPress = () => {
+            if (selectedCategory) {
+                setSelectedCategory(null);
+                return true;
+            }
+            if (selectedGroup) {
+                setSelectedGroup(null);
+                setSearch('');
+                return true;
+            }
+            return false;
+        };
+
+        const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+        return () => subscription.remove();
+    }, [selectedCategory, selectedGroup]);
 
     useEffect(() => {
         if (!auth.currentUser) return;

@@ -132,7 +132,7 @@ export default function HomeScreen({ navigation }) {
 
             <Portal>
                 <Modal visible={visible} onDismiss={() => setVisible(false)}>
-                    <Card style={{ margin: 16, padding: 16, backgroundColor: theme.colors.surface }}>
+                    <Card style={{ margin: 16, padding: 16, backgroundColor: theme.colors.surface, marginBottom: 160}}>
                         <Text variant="titleMedium" style={{ marginBottom: 12 }}>
                             Új lista
                         </Text>
@@ -200,7 +200,7 @@ export default function HomeScreen({ navigation }) {
 
             <Portal>
                 <Modal visible={editVisible} onDismiss={() => setEditVisible(false)}>
-                    <Card style={{ margin: 16, padding: 16, backgroundColor: theme.colors.surface }}>
+                    <Card style={{ margin: 16, padding: 16, backgroundColor: theme.colors.surface, marginBottom: 160}}>
                         <Text variant="titleMedium" style={{ marginBottom: 12 }}>
                             Lista átnevezése
                         </Text>
@@ -219,7 +219,7 @@ export default function HomeScreen({ navigation }) {
 
             <FAB
                 icon="plus"
-                style={styles.fab}
+                style={{position: 'absolute', right: 16, bottom: 24}}
                 onPress={() => setVisible(true)}
             />
 

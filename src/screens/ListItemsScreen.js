@@ -153,7 +153,7 @@ export default function ListItemScreen({ route }) {
 
             <FAB
                 icon="plus"
-                style={{ position: 'absolute', right: 16, bottom: 16 }}
+                style={{ position: 'absolute', right: 16, bottom: 24 }}
                 onPress={() => setAddItemVisible(true)}
             />
 

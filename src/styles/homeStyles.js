@@ -13,9 +13,4 @@ export const homeStyles = StyleSheet.create({
     card: {
         marginBottom: 8,
     },
-    fab: {
-        position: 'absolute',
-        right: 16,
-        bottom: 80
-    },
 });
