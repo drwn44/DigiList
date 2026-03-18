@@ -1,22 +1,28 @@
-import { Text, TextInput, Button, HelperText, useTheme } from 'react-native-paper';
+import { Text, TextInput, Button, HelperText, useTheme, Divider } from 'react-native-paper';
 import { View } from 'react-native';
 import { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth } from '../firebase';
 import { authStyles as styles } from '../styles/authStyles';
-import {getAuthErrorMessage} from "../utils/authErrors";
+import { getAuthErrorMessage } from "../utils/authErrors";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import Constants from 'expo-constants';
 
+GoogleSignin.configure({
+    webClientId: Constants.expoConfig.extra.googleWebClientId,
+});
 
 export default function LoginScreen({ navigation }) {
     const theme = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const [error, setError] = useState('');
 
     const login = async () => {
-        setError('')
+        setError('');
         if (!email || !password) {
             setError('Email és jelszó megadása kötelező!');
             return;
@@ -29,6 +35,22 @@ export default function LoginScreen({ navigation }) {
             setError(getAuthErrorMessage(exc.code));
         } finally {
             setLoading(false);
+        }
+    };
+
+    const googleLogin = async () => {
+        setError('');
+        setGoogleLoading(true);
+        try {
+            await GoogleSignin.hasPlayServices();
+            const userInfo = await GoogleSignin.signIn();
+            const googleCredential = GoogleAuthProvider.credential(userInfo.data.idToken);
+            await signInWithCredential(auth, googleCredential);
+        } catch (exc) {
+            console.error(exc);
+            setError('Google bejelentkezés sikertelen. Próbáld újra!');
+        } finally {
+            setGoogleLoading(false);
         }
     };
 
@@ -91,9 +113,24 @@ export default function LoginScreen({ navigation }) {
                 Belépés
             </Button>
 
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 16, gap: 8 }}>
+                <Divider style={{ flex: 1 }} />
+                <Text variant="bodySmall" style={{ opacity: 0.5 }}>vagy</Text>
+                <Divider style={{ flex: 1 }} />
+            </View>
+
+            <GoogleSigninButton
+                style={{ width: '100%', height: 48 }}
+                size={GoogleSigninButton.Size.Wide}
+                color={GoogleSigninButton.Color.Dark}
+                onPress={googleLogin}
+                disabled={googleLoading}
+            />
+
             <Button
                 mode="text"
                 onPress={() => navigation.navigate('Register')}
+                style={{ marginTop: 16 }}
             >
                 Nincs még fiókod? Regisztráció
             </Button>
