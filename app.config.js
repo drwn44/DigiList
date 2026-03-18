@@ -22,7 +22,7 @@ export default {
         },
         android: {
             package: "com.drwn.digilist",
-            googleServicesFile: "./google-services.json",
+            googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
             adaptiveIcon: {
                 foregroundImage: "./assets/adaptive-icon.png",
                 backgroundColor: "#ffffff"
