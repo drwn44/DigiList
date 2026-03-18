@@ -1,4 +1,4 @@
-import { FlatList } from 'react-native';
+import {FlatList, View} from 'react-native';
 import ShareListModal from '../components/ShareListModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '../firebase.js';
@@ -102,14 +102,9 @@ export default function HomeScreen({ navigation }) {
                             listId: item.id,
                             listName: item.name,
                         })}
-                        onLongPress={() => {
-                            setSelectedListId(item.id);
-                            setEditingListId(item.id);
-                            setListName(item.name);
-                            setActionVisible(true);
-                        }}
                     >
-                        <Card.Title title={item.name}
+                        <Card.Title
+                            title={item.name}
                             subtitle={
                                 item.itemCount > 0
                                     ? `${item.doneCount ?? 0} / ${item.itemCount} elem`
@@ -119,11 +114,24 @@ export default function HomeScreen({ navigation }) {
                                 color: item.completed ? theme.colors.primary : theme.colors.onSurfaceVariant,
                             }}
                             right={(props) => (
-                                item.completed
-                                    ? <IconButton {...props} icon="check-circle" iconColor={theme.colors.primary} />
-                                    : item.members?.length > 1
-                                        ? <IconButton {...props} icon="account-multiple" iconColor={theme.colors.secondary} />
-                                        : null
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    {item.completed && (
+                                        <IconButton {...props} icon="check-circle" iconColor={theme.colors.primary} />
+                                    )}
+                                    {item.members?.length > 1 && (
+                                        <IconButton {...props} icon="account-multiple" iconColor={theme.colors.secondary} />
+                                    )}
+                                    <IconButton
+                                        {...props}
+                                        icon="dots-vertical"
+                                        onPress={() => {
+                                            setSelectedListId(item.id);
+                                            setEditingListId(item.id);
+                                            setListName(item.name);
+                                            setActionVisible(true);
+                                        }}
+                                    />
+                                </View>
                             )}
                         />
                     </Card>
