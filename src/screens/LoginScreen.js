@@ -1,4 +1,5 @@
-import {Text, TextInput, Button, HelperText} from 'react-native-paper';
+import { Text, TextInput, Button, HelperText, useTheme } from 'react-native-paper';
+import { View } from 'react-native';
 import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -8,6 +9,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 
 
 export default function LoginScreen({ navigation }) {
+    const theme = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -36,9 +38,25 @@ export default function LoginScreen({ navigation }) {
             enableOnAndroid={true}
             keyboardShouldPersistTaps="handled"
         >
-            <Text variant="headlineMedium" style={styles.title}>
-                Bejelentkezés
-            </Text>
+            <View style={{ alignItems: 'center', marginBottom: 32 }}>
+                <View style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 20,
+                    backgroundColor: theme.colors.primaryContainer,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: 16,
+                }}>
+                    <Text style={{ fontSize: 36 }}>🛒</Text>
+                </View>
+                <Text variant="headlineLarge" style={{ fontWeight: 'bold', color: theme.colors.primary }}>
+                    DigiList
+                </Text>
+                <Text variant="bodyMedium" style={{ opacity: 0.5, marginTop: 4 }}>
+                    Okos bevásárlás, egyszerűen
+                </Text>
+            </View>
 
             <TextInput
                 label="Email"
@@ -55,6 +73,7 @@ export default function LoginScreen({ navigation }) {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
+                importantForAutofill="no"
                 style={styles.input}
                 error={!!error}
             />
