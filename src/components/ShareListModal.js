@@ -20,7 +20,8 @@ export default function ShareListModal({ visible, onDismiss, listId, members = [
                     const q = query(collection(db, 'users'), where('__name__', '==', uid));
                     const snapshot = await getDocs(q);
                     if (!snapshot.empty) {
-                        return { uid, email: snapshot.docs[0].data().email };
+                        const data = snapshot.docs[0].data();
+                        return { uid, email: data.email, displayName: data.displayName };
                     }
                     return { uid, email: 'Ismeretlen felhasználó' };
                 })
@@ -136,7 +137,7 @@ export default function ShareListModal({ visible, onDismiss, listId, members = [
                         }}
                     >
                         <Text style={{ flex: 1 }}>
-                            {member.email}
+                            {member.displayName ? `${member.displayName} (${member.email})` : member.email}
                             {member.uid === ownerUid ? '  👑' : ''}
                         </Text>
 
