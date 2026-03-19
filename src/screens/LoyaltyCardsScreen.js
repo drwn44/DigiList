@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, FlatList, Modal as RNModal } from 'react-native';
 import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
-import { Text, FAB, Card, Button, TextInput, Portal, Dialog, IconButton } from 'react-native-paper';
+import {Text, FAB, Card, Button, TextInput, Portal, Dialog, IconButton, Snackbar} from 'react-native-paper';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import BarcodeDisplay from '../components/BarcodeDisplay';
 import { auth, db } from '../firebase';
@@ -25,6 +25,8 @@ export default function LoyaltyCardsScreen() {
     const [scanned, setScanned] = useState(false);
     const [scannedData, setScannedData] = useState(null);
     const [permission, requestPermission] = useCameraPermissions();
+    const [snackbarVisible, setSnackbarVisible] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
 
     const insets = useSafeAreaInsets();
 
@@ -61,24 +63,24 @@ export default function LoyaltyCardsScreen() {
 
     const saveCard = async () => {
         if (!cardName.trim() || !barcodeValue.trim()) return;
-
+        setAddVisible(false);
+        setCardName('');
+        setBarcodeValue('');
+        setBarcodeFormat('');
         await addDoc(collection(db, 'users', auth.currentUser.uid, 'loyaltyCards'), {
             name: cardName,
             barcodeValue,
             barcodeFormat,
             createdAt: Timestamp.now(),
         });
-
-        setCardName('');
-        setBarcodeValue('');
-        setBarcodeFormat('');
-        setAddVisible(false);
     };
 
     const confirmDelete = async () => {
         await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'loyaltyCards', selectedCardId));
         setDeleteVisible(false);
         setSelectedCardId(null);
+        setSnackbarMessage("Sikeres törlés!");
+        setSnackbarVisible(true);
     };
 
     const openScanner = async () => {
@@ -92,7 +94,7 @@ export default function LoyaltyCardsScreen() {
     const openManual = () => {
         setFabOpen(false);
         setBarcodeValue('');
-        setBarcodeFormat('CODE128');  // default format for manual entry
+        setBarcodeFormat('CODE128');
         setAddVisible(true);
     };
 
@@ -303,7 +305,7 @@ export default function LoyaltyCardsScreen() {
                     </Dialog.Content>
                     <Dialog.Actions>
                         <Button onPress={() => setDeleteVisible(false)}>Mégse</Button>
-                        <Button onPress={confirmDelete} textColor={theme.colors.primary}>Törlés</Button>
+                        <Button onPress={confirmDelete} textColor={theme.colors.error}>Törlés</Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
@@ -327,6 +329,13 @@ export default function LoyaltyCardsScreen() {
                 ]}
                 onStateChange={({ open }) => setFabOpen(open)}
             />
+            <Snackbar
+                visible={snackbarVisible}
+                onDismiss={() => setSnackbarVisible(false)}
+                duration={3000}
+            >
+                {snackbarMessage}
+            </Snackbar>
         </SafeAreaView>
     );
 }

@@ -113,7 +113,6 @@ export default function RecipeScreen() {
             const parsed = JSON.parse(cleaned);
             setRecipe(parsed);
         } catch (e) {
-            console.error(e);
             setError('Nem sikerült a recept generálása. Próbáld újra!');
         } finally {
             setLoading(false);
@@ -143,6 +142,7 @@ export default function RecipeScreen() {
 
         if (creatingNew) {
             if (!newListName.trim()) return;
+            setAddToListVisible(false);
             const newList = await addDoc(collection(db, 'lists'), {
                 name: newListName,
                 userId: auth.currentUser.uid,
@@ -151,6 +151,8 @@ export default function RecipeScreen() {
                 completed: false,
             });
             targetListId = newList.id;
+        } else {
+            setAddToListVisible(false);
         }
 
         if (!targetListId) return;
