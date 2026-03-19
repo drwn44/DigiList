@@ -350,29 +350,19 @@ export default function PriceScreen() {
                                                 <Text variant="bodySmall" style={{ opacity: 0.5 }}>
                                                     {formatQuantities(item.quantities, item.unit)}
                                                 </Text>
-
-                                                <Text
-                                                    variant="bodySmall"
-                                                    style={{ color: item.store === cheapestStore ? theme.colors.primary : theme.colors.onSurfaceVariant }}
-                                                >
-                                                    {item.minUnitPrice === item.maxUnitPrice
-                                                        ? `${formatPrice(item.minUnitPrice)}/${item.unit}`
-                                                        : `${formatPrice(item.minUnitPrice)}–${formatPrice(item.maxUnitPrice)}/${item.unit}`
-                                                    }
-                                                </Text>
                                             </View>
 
                                             <View style={{ alignItems: 'flex-end', gap: 4 }}>
                                                 <Text
                                                     variant="titleMedium"
                                                     style={{
-                                                        color: item.store === cheapestStore ? theme.colors.primary : theme.colors.onSurface,
+                                                        color: item.store === cheapestStore ? theme.colors.primary : theme.colors.onSurfaceVariant,
                                                         fontWeight: item.store === cheapestStore ? 'bold' : 'normal',
-                                                    }}>
-
-                                                    {item.minPrice === item.maxPrice
-                                                        ? formatPrice(item.minPrice)
-                                                        : `${formatPrice(item.minPrice)}–${formatPrice(item.maxPrice)}`
+                                                    }}
+                                                >
+                                                    {item.minUnitPrice === item.maxUnitPrice
+                                                        ? `${formatPrice(item.minUnitPrice)}/${item.unit}`
+                                                        : `${formatPrice(item.minUnitPrice)}–${formatPrice(item.maxUnitPrice)}/${item.unit}`
                                                     }
                                                 </Text>
 
