@@ -2,6 +2,7 @@ import {FlatList, View} from 'react-native';
 import ShareListModal from '../components/ShareListModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '../firebase.js';
+import {arrayRemove} from "firebase/firestore";
 import {
     addDoc,
     collection,
@@ -15,7 +16,19 @@ import {
     where
 } from 'firebase/firestore';
 import { useEffect, useState } from "react";
-import { Button, Card, Dialog, FAB, IconButton, Modal, Portal, Text, TextInput, useTheme } from "react-native-paper";
+import {
+    Button,
+    Card,
+    Dialog,
+    FAB,
+    IconButton,
+    Modal,
+    Portal,
+    Snackbar,
+    Text,
+    TextInput,
+    useTheme
+} from "react-native-paper";
 import { homeStyles as styles } from '../styles/homeStyles';
 import EmptyState from "../components/EmptyState";
 import AppHeader from '../components/AppHeader';
@@ -33,6 +46,8 @@ export default function HomeScreen({ navigation }) {
     const [actionVisible, setActionVisible] = useState(false);
     const [shareVisible, setShareVisible] = useState(false);
     const [sharingList, setSharingList] = useState(null);
+    const [snackbarVisible, setSnackbarVisible] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
 
     useEffect(() => {
         if (!auth.currentUser)
@@ -48,6 +63,8 @@ export default function HomeScreen({ navigation }) {
 
     const createList = async () => {
         if (!listName.trim()) return;
+        setListName('');
+        setVisible(false);
         await addDoc(collection(db, 'lists'), {
             name: listName,
             userId: auth.currentUser.uid,
@@ -55,8 +72,6 @@ export default function HomeScreen({ navigation }) {
             createdAt: Timestamp.now(),
             completed: false,
         });
-        setListName('');
-        setVisible(false);
     };
 
     const confirmDelete = async () => {
@@ -66,6 +81,8 @@ export default function HomeScreen({ navigation }) {
         await deleteDoc(doc(db, 'lists', selectedListId));
         setDeleteVisible(false);
         setSelectedListId(null);
+        setSnackbarMessage("Sikeres törlés!");
+        setSnackbarVisible(true);
     };
 
     const updateList = async () => {
@@ -77,6 +94,16 @@ export default function HomeScreen({ navigation }) {
         setEditVisible(false);
         setEditingListId(null);
         setListName('');
+    };
+
+    const leaveList = async () => {
+        await updateDoc(doc(db, 'lists', selectedListId), {
+            members: arrayRemove(auth.currentUser.uid),
+        });
+        setActionVisible(false);
+        setSelectedListId(null);
+        setSnackbarMessage("Sikeresen kiléptél a listából!")
+        setSnackbarVisible(true);
     };
 
     return (
@@ -155,6 +182,13 @@ export default function HomeScreen({ navigation }) {
                         <Button mode="contained" onPress={createList}>
                             Létrehozás
                         </Button>
+
+                        <Button mode="text" onPress={() => {
+                            setVisible(false);
+                            setListName('');
+                        }}>
+                            Mégse
+                        </Button>
                     </Card>
                 </Modal>
 
@@ -175,31 +209,28 @@ export default function HomeScreen({ navigation }) {
                 <Dialog visible={actionVisible} onDismiss={() => setActionVisible(false)}>
                     <Dialog.Title>Lista műveletek</Dialog.Title>
                     <Dialog.Actions>
-                        {lists.find(l => l.id === selectedListId)?.userId === auth.currentUser.uid && (
-                            <Button
-                                onPress={() => {
-                                setActionVisible(false);
-                                setEditVisible(true);
-                            }}
-                            >
-                                Átnevezés
-                            </Button>
-                        )}
-                        <Button onPress={() => {
-                            setActionVisible(false);
-                            setSharingList(lists.find(l => l.id === selectedListId));
-                            setShareVisible(true);
-                        }}>
-                            Megosztás
-                        </Button>
-                        {lists.find(l => l.id === selectedListId)?.userId === auth.currentUser.uid && (
-                            <Button textColor={theme.colors.error}
-                                    onPress={() => {
-                                        setActionVisible(false);
-                                        setDeleteVisible(true);
-                                    }}
-                            >
-                                Törlés
+                        {lists.find(l => l.id === selectedListId)?.userId === auth.currentUser.uid ? (
+                            <>
+                                <Button onPress={() => { setActionVisible(false); setEditVisible(true); }}>
+                                    Átnevezés
+                                </Button>
+                                <Button onPress={() => {
+                                    setActionVisible(false);
+                                    setSharingList(lists.find(l => l.id === selectedListId));
+                                    setShareVisible(true);
+                                }}>
+                                    Megosztás
+                                </Button>
+                                <Button textColor={theme.colors.error} onPress={() => {
+                                    setActionVisible(false);
+                                    setDeleteVisible(true);
+                                }}>
+                                    Törlés
+                                </Button>
+                            </>
+                        ) : (
+                            <Button textColor={theme.colors.error} onPress={leaveList}>
+                                Kilépés a listából
                             </Button>
                         )}
                     </Dialog.Actions>
@@ -242,6 +273,14 @@ export default function HomeScreen({ navigation }) {
                     members={lists.find(l => l.id === selectedListId)?.members ?? []}
                 />
             </Portal>
+
+            <Snackbar
+                visible={snackbarVisible}
+                onDismiss={() => setSnackbarVisible(false)}
+                duration={3000}
+            >
+                {snackbarMessage}
+            </Snackbar>
         </SafeAreaView>
     );
 }
