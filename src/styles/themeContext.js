@@ -18,7 +18,7 @@ const darkColors = {
     surfaceVariant: '#2A2A2A',
     onSurfaceVariant: '#B0B0B0',
     outline: '#3DAA70',
-    error: '#CF6679',
+    error: '#B00020',
     onError: '#690024',
 };
 
