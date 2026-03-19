@@ -271,7 +271,10 @@ export default function LoyaltyCardsScreen() {
             </RNModal>
 
             <Portal>
-                <Dialog visible={addVisible} onDismiss={() => setAddVisible(false)}>
+                <Dialog visible={addVisible}
+                        onDismiss={() => setAddVisible(false)}
+                        style={{ backgroundColor: theme.colors.surface }}
+                >
                     <Dialog.Title>Kártya hozzáadása</Dialog.Title>
                     <Dialog.Content>
                         <TextInput
@@ -309,7 +312,7 @@ export default function LoyaltyCardsScreen() {
                 open={fabOpen}
                 visible
                 icon={fabOpen ? 'close' : 'plus'}
-                style={{ marginBottom: -insets.bottom - 24 }}
+                style={{ marginBottom: -insets.bottom}}
                 actions={[
                     {
                         icon: 'camera',

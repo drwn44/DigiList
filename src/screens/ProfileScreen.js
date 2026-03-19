@@ -183,7 +183,7 @@ export default function ProfileScreen({ onClose }) {
                     </HelperText>
 
                     <Button
-                        mode="contained"
+                        mode="contained-tonal"
                         onPress={changePassword}
                         loading={passwordLoading}
                         disabled={passwordLoading}
@@ -195,10 +195,10 @@ export default function ProfileScreen({ onClose }) {
                 <Divider/>
 
                 <Button
-                    buttonColor="transparent"
                     mode="outlined"
-                    textColor={theme.colors.surfaceVariant}
+                    textColor={theme.colors.error}
                     icon="account-remove"
+                    style={{ borderColor: theme.colors.error }}
                     onPress={() => setDeleteAccountVisible(true)}
                 >
                     Fiók törlése
@@ -207,6 +207,7 @@ export default function ProfileScreen({ onClose }) {
                 <Button
                     mode="contained"
                     buttonColor={theme.colors.error}
+                    textColor="#ffffff"
                     icon="logout"
                     onPress={async () =>{
                         await GoogleSignin.signOut();
@@ -226,45 +227,45 @@ export default function ProfileScreen({ onClose }) {
                 <Text variant="bodySmall" style={{ textAlign: 'center', opacity: 0.3, marginTop: 8}}>
                     DigiList v{Constants.expoConfig.version}
                 </Text>
+            </ScrollView>
 
-                <Portal>
-                    <Dialog visible={deleteAccountVisible} onDismiss={() => setDeleteAccountVisible(false)}>
-                        <Dialog.title>Fiók törlése</Dialog.title>
-                        <Dialog.Content>
-                            <Text variant="bodyMedium" style={{marginBottom: 12, opacity: 0.7}}>
-                                Ez a művelet visszafordíthatatlan! Add meg a jelszavad a megerősítéshez!
-                            </Text>
-                            <TextInput
+            <Portal>
+                <Dialog visible={deleteAccountVisible} onDismiss={() => setDeleteAccountVisible(false)}>
+                    <Dialog.title>Fiók törlése</Dialog.title>
+                    <Dialog.Content>
+                        <Text variant="bodyMedium" style={{marginBottom: 12, opacity: 0.7}}>
+                            Ez a művelet visszafordíthatatlan! Add meg a jelszavad a megerősítéshez!
+                        </Text>
+                        <TextInput
                             label="Jelszó"
                             value={deletePassword}
                             onChangeText={(val) => {setDeletePassword(val); setDeletePasswordError(''); }}
                             secureTextEntry
                             importantForAutofill="no"
                             error={!!deletePasswordError}
-                            />
-                            <HelperText type="error" visible={!!deletePasswordError}>
-                                {deletePasswordError}
-                            </HelperText>
-                        </Dialog.Content>
-                        <Dialog.Actions>
-                            <Button onPress={() => {
-                                setDeleteAccountVisible(false);
-                                setDeletePassword('');
-                                setDeletePasswordError('');
-                            }}>
-                                Mégse
-                            </Button>
-                            <Button
-                                textColor={theme.colors.error}
-                                loading={deleteLoading}
-                                onPress={deleteAccount}
-                            >
-                                Törlés
-                            </Button>
-                        </Dialog.Actions>
-                    </Dialog>
-                </Portal>
-            </ScrollView>
+                        />
+                        <HelperText type="error" visible={!!deletePasswordError}>
+                            {deletePasswordError}
+                        </HelperText>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={() => {
+                            setDeleteAccountVisible(false);
+                            setDeletePassword('');
+                            setDeletePasswordError('');
+                        }}>
+                            Mégse
+                        </Button>
+                        <Button
+                            textColor={theme.colors.error}
+                            loading={deleteLoading}
+                            onPress={deleteAccount}
+                        >
+                            Törlés
+                        </Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
 
             <Snackbar
                 visible={snackbarVisible}
