@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, FlatList, Modal as RNModal } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import { Text, FAB, Card, Button, TextInput, Portal, Dialog, IconButton } from 'react-native-paper';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import BarcodeDisplay from '../components/BarcodeDisplay';
@@ -25,6 +25,8 @@ export default function LoyaltyCardsScreen() {
     const [scanned, setScanned] = useState(false);
     const [scannedData, setScannedData] = useState(null);
     const [permission, requestPermission] = useCameraPermissions();
+
+    const insets = useSafeAreaInsets();
 
     useEffect(() => {
         if (!auth.currentUser) return;
@@ -307,7 +309,7 @@ export default function LoyaltyCardsScreen() {
                 open={fabOpen}
                 visible
                 icon={fabOpen ? 'close' : 'plus'}
-                style={{marginBottom: -40}}
+                style={{ marginBottom: -insets.bottom - 8 }}
                 actions={[
                     {
                         icon: 'camera',
