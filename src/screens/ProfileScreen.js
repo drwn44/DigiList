@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { View, ScrollView } from 'react-native';
-import {Text, Button, TextInput, Divider, Snackbar, HelperText, useTheme} from 'react-native-paper';
+import {Text, Button, TextInput, Divider, Snackbar, HelperText, useTheme, Dialog, Portal} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import {deleteDoc, doc, updateDoc} from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import {getAuthErrorMessage} from "../utils/authErrors";
 import { Switch } from 'react-native-paper';
 import {useAppTheme} from "../styles/themeContext";
 import {GoogleSignin} from "@react-native-google-signin/google-signin";
+import Constants from 'expo-constants';
 
 export default function ProfileScreen({ onClose }) {
     const user = auth.currentUser;
@@ -22,6 +23,10 @@ export default function ProfileScreen({ onClose }) {
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [currentPasswordError, setCurrentPasswordError] = useState('');
     const [newPasswordError, setNewPasswordError] = useState('');
+    const [deleteAccountVisible, setDeleteAccountVisible] = useState(false);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [deletePasswordError, setDeletePasswordError] = useState('');
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const theme = useTheme();
     const { isDark, toggleTheme } = useAppTheme();
@@ -75,6 +80,29 @@ export default function ProfileScreen({ onClose }) {
             }
         } finally {
             setPasswordLoading(false);
+        }
+    };
+
+    const deleteAccount = async () => {
+        setDeletePasswordError('');
+        if(!deletePassword){
+            setDeletePasswordError('Jelszó megadása kötelező!')
+            return;
+        }
+        setDeleteLoading(true);
+        try{
+            const credential = EmailAuthProvider.credential(user.email, currentPassword);
+            await reauthenticateWithCredential(user, credential);
+            await deleteDoc(doc(db, 'users', user.uid));
+            await user.delete();
+        }catch(exc){
+            if (exc.code === 'auth/wrong-password' || exc.code === 'auth/invalid-credential') {
+                setDeletePasswordError('Hibás jelszó');
+            } else {
+                setDeletePasswordError(getAuthErrorMessage(exc.code));
+            }
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -167,6 +195,16 @@ export default function ProfileScreen({ onClose }) {
                 <Divider/>
 
                 <Button
+                    buttonColor="transparent"
+                    mode="outlined"
+                    textColor={theme.colors.surfaceVariant}
+                    icon="account-remove"
+                    onPress={() => setDeleteAccountVisible(true)}
+                >
+                    Fiók törlése
+                </Button>
+
+                <Button
                     mode="contained"
                     buttonColor={theme.colors.error}
                     icon="logout"
@@ -185,7 +223,47 @@ export default function ProfileScreen({ onClose }) {
                     <Switch value={isDark} onValueChange={toggleTheme} />
                 </View>
 
+                <Text variant="bodySmall" style={{ textAlign: 'center', opacity: 0.3, marginTop: 8}}>
+                    DigiList v{Constants.expoConfig.version}
+                </Text>
 
+                <Portal>
+                    <Dialog visible={deleteAccountVisible} onDismiss={() => setDeleteAccountVisible(false)}>
+                        <Dialog.title>Fiók törlése</Dialog.title>
+                        <Dialog.Content>
+                            <Text variant="bodyMedium" style={{marginBottom: 12, opacity: 0.7}}>
+                                Ez a művelet visszafordíthatatlan! Add meg a jelszavad a megerősítéshez!
+                            </Text>
+                            <TextInput
+                            label="Jelszó"
+                            value={deletePassword}
+                            onChangeText={(val) => {setDeletePassword(val); setDeletePasswordError(''); }}
+                            secureTextEntry
+                            importantForAutofill="no"
+                            error={!!deletePasswordError}
+                            />
+                            <HelperText type="error" visible={!!deletePasswordError}>
+                                {deletePasswordError}
+                            </HelperText>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={() => {
+                                setDeleteAccountVisible(false);
+                                setDeletePassword('');
+                                setDeletePasswordError('');
+                            }}>
+                                Mégse
+                            </Button>
+                            <Button
+                                textColor={theme.colors.error}
+                                loading={deleteLoading}
+                                onPress={deleteAccount}
+                            >
+                                Törlés
+                            </Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                </Portal>
             </ScrollView>
 
             <Snackbar
