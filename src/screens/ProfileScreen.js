@@ -2,7 +2,13 @@ import { useState } from 'react';
 import { View, ScrollView } from 'react-native';
 import {Text, Button, TextInput, Divider, Snackbar, HelperText, useTheme, Dialog, Portal} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth';
+import {
+    updatePassword,
+    reauthenticateWithCredential,
+    EmailAuthProvider,
+    updateProfile,
+    GoogleAuthProvider
+} from 'firebase/auth';
 import {deleteDoc, doc, updateDoc} from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import {getAuthErrorMessage} from "../utils/authErrors";
@@ -13,6 +19,7 @@ import Constants from 'expo-constants';
 
 export default function ProfileScreen({ onClose }) {
     const user = auth.currentUser;
+    const isGoogleUser = user?.providerData?.some(p => p.providerId === 'google.com');
 
     const [displayName, setDisplayName] = useState(user?.displayName || '');
     const [currentPassword, setCurrentPassword] = useState('');
@@ -85,14 +92,21 @@ export default function ProfileScreen({ onClose }) {
 
     const deleteAccount = async () => {
         setDeletePasswordError('');
-        if(!deletePassword){
+        if(!isGoogleUser && !deletePassword){
             setDeletePasswordError('Jelszó megadása kötelező!')
             return;
         }
         setDeleteLoading(true);
-        try{
-            const credential = EmailAuthProvider.credential(user.email, currentPassword);
-            await reauthenticateWithCredential(user, credential);
+        try {
+            if (isGoogleUser) {
+                await GoogleSignin.signIn();
+                const userInfo = await GoogleSignin.getTokens();
+                const credential = GoogleAuthProvider.credential(userInfo.idToken);
+                await reauthenticateWithCredential(user, credential);
+            } else {
+                const credential = EmailAuthProvider.credential(user.email, deletePassword);
+                await reauthenticateWithCredential(user, credential);
+            }
             await deleteDoc(doc(db, 'users', user.uid));
             await user.delete();
         }catch(exc){
@@ -154,43 +168,47 @@ export default function ProfileScreen({ onClose }) {
 
                 <Divider/>
 
-                <View style={{ gap: 8 }}>
-                    <Text variant="titleMedium">Jelszó megváltoztatása</Text>
-                    <TextInput
-                        label="Jelenlegi jelszó"
-                        value={currentPassword}
-                        onChangeText={(val) => { setCurrentPassword(val); setCurrentPasswordError(''); }}
-                        secureTextEntry
-                        importantForAutofill="no"
-                        error={!!currentPasswordError}
-                    />
+                {!isGoogleUser && (
+                    <>
+                        <View style={{ gap: 8 }}>
+                            <Text variant="titleMedium">Jelszó megváltoztatása</Text>
+                            <TextInput
+                                label="Jelenlegi jelszó"
+                                value={currentPassword}
+                                onChangeText={(val) => { setCurrentPassword(val); setCurrentPasswordError(''); }}
+                                secureTextEntry
+                                importantForAutofill="no"
+                                error={!!currentPasswordError}
+                            />
 
-                    <HelperText type="error" visible={!!currentPasswordError}>
-                        {currentPasswordError}
-                    </HelperText>
+                            <HelperText type="error" visible={!!currentPasswordError}>
+                                {currentPasswordError}
+                            </HelperText>
 
-                    <TextInput
-                        label="Új jelszó"
-                        value={newPassword}
-                        onChangeText={(val) => { setNewPassword(val); setNewPasswordError(''); }}
-                        secureTextEntry
-                        importantForAutofill="no"
-                        error={!!newPasswordError}
+                            <TextInput
+                                label="Új jelszó"
+                                value={newPassword}
+                                onChangeText={(val) => { setNewPassword(val); setNewPasswordError(''); }}
+                                secureTextEntry
+                                importantForAutofill="no"
+                                error={!!newPasswordError}
 
-                    />
-                    <HelperText type="error" visible={!!newPasswordError}>
-                        {newPasswordError}
-                    </HelperText>
+                            />
+                            <HelperText type="error" visible={!!newPasswordError}>
+                                {newPasswordError}
+                            </HelperText>
 
-                    <Button
-                        mode="contained-tonal"
-                        onPress={changePassword}
-                        loading={passwordLoading}
-                        disabled={passwordLoading}
-                    >
-                        Jelszó megváltoztatása
-                    </Button>
-                </View>
+                            <Button
+                                mode="contained-tonal"
+                                onPress={changePassword}
+                                loading={passwordLoading}
+                                disabled={passwordLoading}
+                            >
+                                Jelszó megváltoztatása
+                            </Button>
+                        </View>
+                    </>
+                )}
 
                 <Divider/>
 
@@ -231,22 +249,26 @@ export default function ProfileScreen({ onClose }) {
 
             <Portal>
                 <Dialog visible={deleteAccountVisible} onDismiss={() => setDeleteAccountVisible(false)}>
-                    <Dialog.title>Fiók törlése</Dialog.title>
+                    <Dialog.Title>Fiók törlése</Dialog.Title>
                     <Dialog.Content>
                         <Text variant="bodyMedium" style={{marginBottom: 12, opacity: 0.7}}>
-                            Ez a művelet visszafordíthatatlan! Add meg a jelszavad a megerősítéshez!
+                            Ez a művelet visszafordíthatatlan!
                         </Text>
-                        <TextInput
-                            label="Jelszó"
-                            value={deletePassword}
-                            onChangeText={(val) => {setDeletePassword(val); setDeletePasswordError(''); }}
-                            secureTextEntry
-                            importantForAutofill="no"
-                            error={!!deletePasswordError}
-                        />
-                        <HelperText type="error" visible={!!deletePasswordError}>
-                            {deletePasswordError}
-                        </HelperText>
+                        {!isGoogleUser && (
+                            <>
+                                <TextInput
+                                    label="Jelszó"
+                                    value={deletePassword}
+                                    onChangeText={(val) => {setDeletePassword(val); setDeletePasswordError(''); }}
+                                    secureTextEntry
+                                    importantForAutofill="no"
+                                    error={!!deletePasswordError}
+                                />
+                                <HelperText type="error" visible={!!deletePasswordError}>
+                                    {deletePasswordError}
+                                </HelperText>
+                            </>
+                        )}
                     </Dialog.Content>
                     <Dialog.Actions>
                         <Button onPress={() => {
