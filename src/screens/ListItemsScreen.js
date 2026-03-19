@@ -30,10 +30,14 @@ export default function ListItemScreen({ route }) {
     useEffect(() => {
         const q = collection(db, 'lists', listId, 'items');
         return onSnapshot(q, async (snapshot) => {
-            const data = snapshot.docs.map(doc => ({
+            const data = snapshot.docs
+                .map(doc => ({
                 id: doc.id,
-                ...doc.data(),
-            }));
+                ...doc.data(),}))
+                .sort((a, b)=>{
+                    if (a.done === b.done) return 0;
+                    return a.done ? 1 : - 1;
+                });
             setItems(data);
 
             const total = data.length;
@@ -50,6 +54,10 @@ export default function ListItemScreen({ route }) {
 
     const addItem = async () => {
         if (!itemName.trim()) return;
+        setAddItemVisible(false);
+        setItemName('');
+        setItemQuantity('1');
+        setItemUnit('db');
         await addDoc(collection(db, 'lists', listId, 'items'), {
             name: itemName,
             done: false,
@@ -57,10 +65,6 @@ export default function ListItemScreen({ route }) {
             unit: itemUnit,
             createdAt: Timestamp.now(),
         });
-        setItemName('');
-        setItemQuantity('1');
-        setItemUnit('db');
-        setAddItemVisible(false);
     };
 
     const toggleDone = async (item) => {
@@ -226,7 +230,14 @@ export default function ListItemScreen({ route }) {
                         <Button mode="contained" onPress={addItem}>
                             Hozzáadás
                         </Button>
-
+                        <Button mode="text" onPress={() => {
+                            setAddItemVisible(false);
+                            setItemName('');
+                            setItemQuantity('1');
+                            setItemUnit('db');
+                        }}>
+                            Mégse
+                        </Button>
                 </Modal>
 
                 <CategoryPicker
