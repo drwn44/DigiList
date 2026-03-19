@@ -52,7 +52,7 @@ export default function CategoryPicker({ visible, onCancel, onSelectProduct }) {
     return(
         <Modal visible={visible} onDismiss={handleCancel}>
 
-            <Card style={{ margin: 16, padding: 16, maxHeight: '80%' }}>
+            <Card style={{ margin: 16, padding: 16, maxHeight: '80%', backgroundColor: theme.colors.surface}}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                     <IconButton icon="arrow-left" onPress={() => setSelectedGroup(null)} />
                     <Text variant="titleMedium">{selectedGroup.icon} {selectedGroup.name}</Text>
@@ -64,7 +64,7 @@ export default function CategoryPicker({ visible, onCancel, onSelectProduct }) {
                     renderItem={({ item}) => (
                         <TouchableOpacity
                             onPress={() => handleSelect(item)}
-                            style={{paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f0f0f0',}}>
+                            style={{paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: theme.colors.surfaceVariant,}}>
                             <Text variant="bodyLarge">{item}</Text>
                         </TouchableOpacity>
                     )}
