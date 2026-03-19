@@ -1,16 +1,24 @@
-import {Text, TextInput, Button, HelperText} from 'react-native-paper';
+import { Text, TextInput, Button, HelperText, Divider } from 'react-native-paper';
+import { View } from 'react-native';
 import { useState } from 'react';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { setDoc, doc, Timestamp } from 'firebase/firestore';
-import {auth, db} from '../firebase';
+import { auth, db } from '../firebase';
 import { authStyles as styles } from '../styles/authStyles';
-import {getAuthErrorMessage} from "../utils/authErrors";
+import { getAuthErrorMessage } from "../utils/authErrors";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import Constants from 'expo-constants';
+
+GoogleSignin.configure({
+    webClientId: Constants.expoConfig.extra.googleWebClientId,
+});
 
 export default function RegisterScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const [displayName, setDisplayName] = useState('');
     const [error, setError] = useState('');
 
@@ -31,9 +39,33 @@ export default function RegisterScreen({ navigation }) {
                 createdAt: Timestamp.now(),
             });
         } catch (exc) {
-            setError(getAuthErrorMessage(exc.code))
+            setError(getAuthErrorMessage(exc.code));
         } finally {
             setLoading(false);
+        }
+    };
+
+    const googleRegister = async () => {
+        setError('');
+        setGoogleLoading(true);
+        try {
+            await GoogleSignin.hasPlayServices();
+            const userInfo = await GoogleSignin.signIn();
+            const googleCredential = GoogleAuthProvider.credential(userInfo.data.idToken);
+            const userCredential = await signInWithCredential(auth, googleCredential);
+
+            if (userCredential.additionalUserInfo?.isNewUser) {
+                await setDoc(doc(db, 'users', userCredential.user.uid), {
+                    displayName: userCredential.user.displayName || '',
+                    email: userCredential.user.email.toLowerCase(),
+                    createdAt: Timestamp.now(),
+                });
+            }
+        } catch (exc) {
+            console.error(exc);
+            setError('Google regisztráció sikertelen. Próbáld újra!');
+        } finally {
+            setGoogleLoading(false);
         }
     };
 
@@ -70,6 +102,7 @@ export default function RegisterScreen({ navigation }) {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
+                importantForAutofill="no"
                 style={styles.input}
                 error={!!error}
             />
@@ -87,9 +120,24 @@ export default function RegisterScreen({ navigation }) {
                 Regisztráció
             </Button>
 
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 16, gap: 8 }}>
+                <Divider style={{ flex: 1 }} />
+                <Text variant="bodySmall" style={{ opacity: 0.5 }}>vagy</Text>
+                <Divider style={{ flex: 1 }} />
+            </View>
+
+            <GoogleSigninButton
+                style={{ width: '100%', height: 48 }}
+                size={GoogleSigninButton.Size.Wide}
+                color={GoogleSigninButton.Color.Dark}
+                onPress={googleRegister}
+                disabled={googleLoading}
+            />
+
             <Button
                 mode="text"
                 onPress={() => navigation.goBack()}
+                style={{ marginTop: 16 }}
             >
                 Vissza a belépéshez
             </Button>

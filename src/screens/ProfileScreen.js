@@ -8,6 +8,7 @@ import { auth, db } from '../firebase';
 import {getAuthErrorMessage} from "../utils/authErrors";
 import { Switch } from 'react-native-paper';
 import {useAppTheme} from "../styles/themeContext";
+import {GoogleSignin} from "@react-native-google-signin/google-signin";
 
 export default function ProfileScreen({ onClose }) {
     const user = auth.currentUser;
@@ -169,7 +170,10 @@ export default function ProfileScreen({ onClose }) {
                     mode="contained"
                     buttonColor={theme.colors.error}
                     icon="logout"
-                    onPress={() => auth.signOut()}
+                    onPress={async () =>{
+                        await GoogleSignin.signOut();
+                        await auth.signOut();
+                    }}
                 >
                     Kijelentkezés
                 </Button>
