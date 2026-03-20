@@ -158,6 +158,7 @@ export default function RegisterScreen({ navigation }) {
                 mode="text"
                 onPress={() => navigation.goBack()}
                 style={{ marginTop: 16 }}
+                textColor={theme.colors.onBackground}
             >
                 Vissza a belépéshez
             </Button>

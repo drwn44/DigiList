@@ -322,11 +322,15 @@ export default function LoyaltyCardsScreen() {
                         icon: 'camera',
                         label: 'Beolvasás',
                         onPress: openScanner,
+                        style: { backgroundColor: theme.colors.surface },
+                        color: theme.colors.primary,
                     },
                     {
                         icon: 'keyboard',
                         label: 'Manuális',
                         onPress: openManual,
+                        style: { backgroundColor: theme.colors.surface },
+                        color: theme.colors.primary,
                     },
                 ]}
                 onStateChange={({ open }) => setFabOpen(open)}

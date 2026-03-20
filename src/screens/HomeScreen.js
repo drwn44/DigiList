@@ -1,4 +1,4 @@
-import {FlatList, View} from 'react-native';
+import {FlatList, View, Modal} from 'react-native';
 import ShareListModal from '../components/ShareListModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '../firebase.js';
@@ -22,7 +22,6 @@ import {
     Dialog,
     FAB,
     IconButton,
-    Modal,
     Portal,
     Snackbar,
     Text,
@@ -194,7 +193,7 @@ export default function HomeScreen({ navigation }) {
                     </Card>
                 </Modal>
 
-                <Dialog visible={deleteVisible} onDismiss={() => setDeleteVisible(false)}>
+                <Dialog visible={deleteVisible} onDismiss={() => setDeleteVisible(false)} style={{ backgroundColor: theme.colors.surface }}>
                     <Dialog.Title>Lista törlése</Dialog.Title>
                     <Dialog.Content>
                         <Text>Biztosan törölni szeretnéd ezt a listát?</Text>
