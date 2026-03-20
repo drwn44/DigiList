@@ -21,6 +21,7 @@ import AppHeader from '../components/AppHeader';
 import useProductData from '../hooks/useExcelPriceSheet';
 import { CATEGORY_GROUPS } from '../data/categoryGroups';
 import EmptyState from "../components/EmptyState";
+import OfflineBanner from "../components/OfflineBanner";
 
 const formatPrice = (val) => `${Math.round(val).toLocaleString('hu-HU')} Ft`;
 
@@ -201,6 +202,7 @@ export default function PriceScreen() {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <AppHeader title="Árak összehasonlítása"/>
+            <OfflineBanner />
             {loading ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16 }}>
                     <ActivityIndicator size="large" />

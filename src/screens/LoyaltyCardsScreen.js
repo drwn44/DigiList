@@ -10,6 +10,7 @@ import AppHeader from '../components/AppHeader';
 import EmptyState from '../components/EmptyState';
 
 import { useTheme } from 'react-native-paper';
+import OfflineBanner from "../components/OfflineBanner";
 
 export default function LoyaltyCardsScreen() {
     const [cards, setCards] = useState([]);
@@ -101,6 +102,7 @@ export default function LoyaltyCardsScreen() {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <AppHeader title="Hűségkártyák"/>
+            <OfflineBanner />
             <FlatList
                 contentContainerStyle={{ padding: 16, paddingBottom: 96, flexGrow: cards.length === 0 ? 1 : 0 }}
                 data={cards}

@@ -8,6 +8,7 @@ import { db } from '../firebase';
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 import EmptyState from "../components/EmptyState";
 import AppHeader from '../components/AppHeader';
+import OfflineBanner from "../components/OfflineBanner";
 
 const UNITS = ['db', 'kg', 'g', 'l', 'dl', 'ml', 'csomag', 'karton'];
 
@@ -89,7 +90,7 @@ export default function ListItemScreen({ route }) {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <AppHeader title={listName} />
-
+            <OfflineBanner />
             <Text
                 variant="bodyMedium"
                 style={{

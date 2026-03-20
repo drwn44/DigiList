@@ -18,7 +18,7 @@ export default function OfflineBanner() {
                 Nincs internetkapcsolat
             </Text>
             <Text variant="bodySmall" style={{ color: theme.colors.onErrorContainer, opacity: 0.8 }}>
-                Az offline módban létrehozott listák és hűségkártyák szinkronizálódnak, amint visszaáll a kapcsolat. A vonalkód generálás nem elérhető offline módban.
+                Az offline módban létrehozott listák és hűségkártyák szinkronizálódnak, amint visszaáll a kapcsolat. A vonalkód és recept generálás nem elérhető offline módban.
             </Text>
         </View>
     );

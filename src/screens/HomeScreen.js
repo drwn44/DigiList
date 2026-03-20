@@ -32,6 +32,7 @@ import {
 import { homeStyles as styles } from '../styles/homeStyles';
 import EmptyState from "../components/EmptyState";
 import AppHeader from '../components/AppHeader';
+import OfflineBanner from "../components/OfflineBanner";
 
 export default function HomeScreen({ navigation }) {
     const theme = useTheme();
@@ -109,6 +110,7 @@ export default function HomeScreen({ navigation }) {
     return (
         <SafeAreaView style={styles.container}>
             <AppHeader title="Bevásárlólisták"/>
+            <OfflineBanner />
             <FlatList
                 contentContainerStyle={{ padding: 16, paddingBottom: 96, flexGrow: lists.length === 0 ? 1 : 0 }}
                 data={lists}

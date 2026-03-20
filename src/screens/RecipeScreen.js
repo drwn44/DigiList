@@ -9,6 +9,7 @@ import { collection, addDoc, query, where, onSnapshot, Timestamp, doc, setDoc, d
 import { auth, db } from '../firebase';
 import AppHeader from '../components/AppHeader';
 import Constants from 'expo-constants';
+import OfflineBanner from "../components/OfflineBanner";
 
 const GROQ_API_KEY = Constants.expoConfig.extra.groqApiKey;
 
@@ -194,7 +195,7 @@ export default function RecipeScreen() {
     return (
         <SafeAreaView style={{ flex: 1 }}>
             <AppHeader title="Recept generátor"/>
-
+            <OfflineBanner />
             <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
 
                 {savedRecipes.length > 0 && (
