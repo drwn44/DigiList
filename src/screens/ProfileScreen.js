@@ -9,8 +9,7 @@ import {
     updateProfile,
     GoogleAuthProvider
 } from 'firebase/auth';
-import {deleteDoc, doc, updateDoc} from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { collection, deleteDoc, doc, getDocs, updateDoc, query, where, arrayRemove } from 'firebase/firestore';import { auth, db } from '../firebase';
 import {getAuthErrorMessage} from "../utils/authErrors";
 import { Switch } from 'react-native-paper';
 import {useAppTheme} from "../styles/themeContext";
@@ -107,6 +106,30 @@ export default function ProfileScreen({ onClose }) {
                 const credential = EmailAuthProvider.credential(user.email, deletePassword);
                 await reauthenticateWithCredential(user, credential);
             }
+
+            const cardsRef = collection(db, 'users', user.uid, 'loyaltyCards');
+            const cardsSnapshot = await getDocs(cardsRef);
+            await Promise.all(cardsSnapshot.docs.map(d => deleteDoc(d.ref)));
+
+            const recipesRef = collection(db, 'users', user.uid, 'recipes');
+            const recipesSnapshot = await getDocs(recipesRef);
+            await Promise.all(recipesSnapshot.docs.map(d => deleteDoc(d.ref)));
+
+            const listsRef = query(collection(db, 'lists'), where('userId', '==', user.uid));
+            const listsSnapshot = await getDocs(listsRef);
+            await Promise.all(listsSnapshot.docs.map(async (listDoc) => {
+                const itemsRef = collection(db, 'lists', listDoc.id, 'items');
+                const itemsSnapshot = await getDocs(itemsRef);
+                await Promise.all(itemsSnapshot.docs.map(d => deleteDoc(d.ref)));
+                await deleteDoc(listDoc.ref);
+            }));
+
+            const sharedListsRef = query(collection(db, 'lists'), where('members', 'array-contains', user.uid));
+            const sharedListsSnapshot = await getDocs(sharedListsRef);
+            await Promise.all(sharedListsSnapshot.docs.map(d =>
+                updateDoc(d.ref, { members: arrayRemove(user.uid) })
+            ));
+
             await deleteDoc(doc(db, 'users', user.uid));
             await user.delete();
             if(isGoogleUser){
@@ -251,7 +274,7 @@ export default function ProfileScreen({ onClose }) {
             </ScrollView>
 
             <Portal>
-                <Dialog visible={deleteAccountVisible} onDismiss={() => setDeleteAccountVisible(false)}>
+                <Dialog visible={deleteAccountVisible} onDismiss={() => setDeleteAccountVisible(false)} style={{ backgroundColor: theme.colors.surface }}>
                     <Dialog.Title>Fiók törlése</Dialog.Title>
                     <Dialog.Content>
                         <Text variant="bodyMedium" style={{marginBottom: 12, opacity: 0.7}}>

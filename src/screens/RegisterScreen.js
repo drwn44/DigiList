@@ -1,4 +1,4 @@
-import { Text, TextInput, Button, HelperText, Divider } from 'react-native-paper';
+import {Text, TextInput, Button, HelperText, Divider, useTheme} from 'react-native-paper';
 import { View } from 'react-native';
 import { useState } from 'react';
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
@@ -22,6 +22,7 @@ export default function RegisterScreen({ navigation }) {
     const [displayName, setDisplayName] = useState('');
     const [error, setError] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const theme = useTheme();
 
     const register = async () => {
         setError('');
