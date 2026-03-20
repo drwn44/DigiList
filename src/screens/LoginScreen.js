@@ -2,12 +2,13 @@ import { Text, TextInput, Button, HelperText, useTheme, Divider } from 'react-na
 import { View } from 'react-native';
 import { useState } from 'react';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
 import { authStyles as styles } from '../styles/authStyles';
 import { getAuthErrorMessage } from "../utils/authErrors";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import Constants from 'expo-constants';
+import {doc, setDoc, Timestamp} from "firebase/firestore";
 
 GoogleSignin.configure({
     webClientId: Constants.expoConfig.extra.googleWebClientId,
@@ -45,10 +46,21 @@ export default function LoginScreen({ navigation }) {
             await GoogleSignin.hasPlayServices();
             const userInfo = await GoogleSignin.signIn();
             const googleCredential = GoogleAuthProvider.credential(userInfo.data.idToken);
-            await signInWithCredential(auth, googleCredential);
+            const userCredential = await signInWithCredential(auth, googleCredential);
+
+            if (userCredential.additionalUserInfo?.isNewUser) {
+                await setDoc(doc(db, 'users', userCredential.user.uid), {
+                    displayName: userCredential.user.displayName || '',
+                    email: userCredential.user.email.toLowerCase(),
+                    createdAt: Timestamp.now(),
+                });
+            }
         } catch (exc) {
-            console.error(exc);
-            setError('Google bejelentkezés sikertelen. Próbáld újra!');
+            if (exc.code === 'auth/account-exists-with-different-credential') {
+                setError(getAuthErrorMessage(exc.code));
+            } else {
+                setError('Google bejelentkezés sikertelen. Próbáld újra!');
+            }
         } finally {
             setGoogleLoading(false);
         }

@@ -109,6 +109,9 @@ export default function ProfileScreen({ onClose }) {
             }
             await deleteDoc(doc(db, 'users', user.uid));
             await user.delete();
+            if(isGoogleUser){
+                await GoogleSignin.signOut();
+            }
         }catch(exc){
             if (exc.code === 'auth/wrong-password' || exc.code === 'auth/invalid-credential') {
                 setDeletePasswordError('Hibás jelszó');

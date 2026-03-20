@@ -8,6 +8,7 @@ export const getAuthErrorMessage = (code) => {
         case 'auth/email-already-in-use': return 'Ez az email cím már foglalt';
         case 'auth/weak-password': return 'A jelszó legalább 6 karakter legyen';
         case 'auth/password-does-not-meet-requirements': return 'A jelszónak tartalmaznia kell nagy- és kisbetűt, számot és speciális karaktert';
+        case 'auth/account-exists-with-different-credential': return 'Ez az email cím már regisztrálva van jelszóval. Kérjük, jelentkezz be email és jelszó segítségével.';
         default: return 'Hiba történt, próbáld újra';
     }
 };

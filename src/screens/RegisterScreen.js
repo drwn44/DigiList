@@ -21,13 +21,20 @@ export default function RegisterScreen({ navigation }) {
     const [googleLoading, setGoogleLoading] = useState(false);
     const [displayName, setDisplayName] = useState('');
     const [error, setError] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     const register = async () => {
         setError('');
-        if (!displayName || !email || !password) {
+        if (!displayName || !email || !password || !confirmPassword) {
             setError('Minden mező kitöltése kötelező!')
             return;
         }
+
+        if (password !== confirmPassword) {
+            setError('A két jelszó nem egyezik meg!');
+            return;
+        }
+
         try {
             setLoading(true);
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -62,8 +69,11 @@ export default function RegisterScreen({ navigation }) {
                 });
             }
         } catch (exc) {
-            console.error(exc);
-            setError('Google regisztráció sikertelen. Próbáld újra!');
+            if (exc.code === 'auth/account-exists-with-different-credential') {
+                setError(getAuthErrorMessage(exc.code));
+            } else {
+                setError('Google bejelentkezés sikertelen. Próbáld újra!');
+            }
         } finally {
             setGoogleLoading(false);
         }
@@ -101,6 +111,16 @@ export default function RegisterScreen({ navigation }) {
                 label="Jelszó"
                 value={password}
                 onChangeText={setPassword}
+                secureTextEntry
+                importantForAutofill="no"
+                style={styles.input}
+                error={!!error}
+            />
+
+            <TextInput
+                label="Jelszó megerősítése"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
                 secureTextEntry
                 importantForAutofill="no"
                 style={styles.input}
