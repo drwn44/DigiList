@@ -2,7 +2,7 @@ import {Text, TextInput, Button, HelperText, Divider, useTheme} from 'react-nati
 import { View } from 'react-native';
 import { useState } from 'react';
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
-import { setDoc, doc, Timestamp, getDoc } from 'firebase/firestore';
+import { setDoc, doc, Timestamp } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { authStyles as styles } from '../styles/authStyles';
 import { getAuthErrorMessage } from "../utils/authErrors";

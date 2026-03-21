@@ -7,9 +7,9 @@ import {
     reauthenticateWithCredential,
     EmailAuthProvider,
     updateProfile,
-    GoogleAuthProvider, onAuthStateChanged
+    GoogleAuthProvider,
 } from 'firebase/auth';
-import { collection, deleteDoc, doc, getDocs, updateDoc, query, where, arrayRemove } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, updateDoc, query, where, arrayRemove, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import {getAuthErrorMessage} from "../utils/authErrors";
 import { Switch } from 'react-native-paper';
@@ -34,6 +34,15 @@ export default function ProfileScreen({ onClose }) {
     const [deletePassword, setDeletePassword] = useState('');
     const [deletePasswordError, setDeletePasswordError] = useState('');
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [userEmail, setUserEmail] = useState('');
+
+    useEffect(() => {
+        if (!user?.uid) return;
+        getDoc(doc(db, 'users', user.uid)).then(snap => {
+            if (snap.exists())
+                setUserEmail(snap.data().email || '');
+        });
+    }, [user?.uid]);
 
     const theme = useTheme();
     const { isDark, toggleTheme } = useAppTheme();
@@ -42,13 +51,6 @@ export default function ProfileScreen({ onClose }) {
         setSnackbarMessage(message);
         setSnackbarVisible(true);
     };
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-        });
-        return () => unsubscribe();
-    }, []);
 
     const saveName = async () => {
         if (!displayName.trim()) return;
@@ -168,7 +170,7 @@ export default function ProfileScreen({ onClose }) {
                     <Text variant="bodySmall" style={{ opacity: 0.5, marginBottom: 4 }}>
                         Email
                     </Text>
-                    <Text variant="bodyLarge">{user?.email}</Text>
+                    <Text variant="bodyLarge">{userEmail || user?.email}</Text>
                 </View>
 
                 <Divider/>
