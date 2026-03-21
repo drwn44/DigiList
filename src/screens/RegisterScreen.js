@@ -43,7 +43,7 @@ export default function RegisterScreen({ navigation }) {
 
             await setDoc(doc(db, 'users', userCredential.user.uid), {
                 displayName: displayName.trim(),
-                email: userCredential.user.email.toLowerCase(),
+                email: (userCredential.user.email || '').toLowerCase(),
                 createdAt: Timestamp.now(),
             });
         } catch (exc) {

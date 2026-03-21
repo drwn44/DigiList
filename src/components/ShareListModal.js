@@ -37,7 +37,7 @@ export default function ShareListModal({ visible, onDismiss, listId, members = [
         const trimmed = email.trim().toLowerCase();
         if (!trimmed) return;
 
-        if (trimmed === auth.currentUser.email.toLowerCase()) {
+        if (trimmed === (auth.currentUser.email || '').toLowerCase()) {
             setAddError('Saját magaddal nem oszthatod meg.');
             return;
         }
