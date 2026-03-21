@@ -62,15 +62,12 @@ export default function RegisterScreen({ navigation }) {
             const googleCredential = GoogleAuthProvider.credential(userInfo.data.idToken);
             const userCredential = await signInWithCredential(auth, googleCredential);
 
-            const userDocRef = doc(db, 'users', userCredential.user.uid);
-            const userDocSnap = await getDoc(userDocRef);
-            if (!userDocSnap.exists()) {
-                await setDoc(userDocRef, {
-                    displayName: userCredential.user.displayName || '',
-                    email: userCredential.user.email.toLowerCase(),
-                    createdAt: Timestamp.now(),
-                });
-            }
+            await setDoc(doc(db, 'users', userCredential.user.uid), {
+                displayName: userCredential.user.displayName || userInfo.data.user.name || '',
+                email: (userCredential.user.email || userInfo.data.user.email || '').toLowerCase(),
+                createdAt: Timestamp.now(),
+            }, { merge: true });
+
         } catch (exc) {
             if (exc.code === 'auth/account-exists-with-different-credential') {
                 setError(getAuthErrorMessage(exc.code));

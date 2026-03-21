@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { View, ScrollView } from 'react-native';
 import {Text, Button, TextInput, Divider, Snackbar, HelperText, useTheme, Dialog, Portal} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import {
     reauthenticateWithCredential,
     EmailAuthProvider,
     updateProfile,
-    GoogleAuthProvider
+    GoogleAuthProvider, onAuthStateChanged
 } from 'firebase/auth';
 import { collection, deleteDoc, doc, getDocs, updateDoc, query, where, arrayRemove } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -18,7 +18,7 @@ import {GoogleSignin} from "@react-native-google-signin/google-signin";
 import Constants from 'expo-constants';
 
 export default function ProfileScreen({ onClose }) {
-    const user = auth.currentUser;
+    const [user, setUser] = useState(auth.currentUser);
     const isGoogleUser = user?.providerData?.some(p => p.providerId === 'google.com');
 
     const [displayName, setDisplayName] = useState(user?.displayName || '');
@@ -42,6 +42,13 @@ export default function ProfileScreen({ onClose }) {
         setSnackbarMessage(message);
         setSnackbarVisible(true);
     };
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+        return () => unsubscribe();
+    }, []);
 
     const saveName = async () => {
         if (!displayName.trim()) return;
