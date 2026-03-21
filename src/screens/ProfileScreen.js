@@ -9,7 +9,8 @@ import {
     updateProfile,
     GoogleAuthProvider
 } from 'firebase/auth';
-import { collection, deleteDoc, doc, getDocs, updateDoc, query, where, arrayRemove } from 'firebase/firestore';import { auth, db } from '../firebase';
+import { collection, deleteDoc, doc, getDocs, updateDoc, query, where, arrayRemove } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 import {getAuthErrorMessage} from "../utils/authErrors";
 import { Switch } from 'react-native-paper';
 import {useAppTheme} from "../styles/themeContext";
@@ -114,15 +115,6 @@ export default function ProfileScreen({ onClose }) {
             const recipesRef = collection(db, 'users', user.uid, 'recipes');
             const recipesSnapshot = await getDocs(recipesRef);
             await Promise.all(recipesSnapshot.docs.map(d => deleteDoc(d.ref)));
-
-            const listsRef = query(collection(db, 'lists'), where('userId', '==', user.uid));
-            const listsSnapshot = await getDocs(listsRef);
-            await Promise.all(listsSnapshot.docs.map(async (listDoc) => {
-                const itemsRef = collection(db, 'lists', listDoc.id, 'items');
-                const itemsSnapshot = await getDocs(itemsRef);
-                await Promise.all(itemsSnapshot.docs.map(d => deleteDoc(d.ref)));
-                await deleteDoc(listDoc.ref);
-            }));
 
             const sharedListsRef = query(collection(db, 'lists'), where('members', 'array-contains', user.uid));
             const sharedListsSnapshot = await getDocs(sharedListsRef);

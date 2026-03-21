@@ -1,4 +1,4 @@
-import {FlatList, View, Modal} from 'react-native';
+import {FlatList, View} from 'react-native';
 import ShareListModal from '../components/ShareListModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '../firebase.js';
@@ -26,7 +26,7 @@ import {
     Snackbar,
     Text,
     TextInput,
-    useTheme
+    useTheme,
 } from "react-native-paper";
 import { homeStyles as styles } from '../styles/homeStyles';
 import EmptyState from "../components/EmptyState";
@@ -167,32 +167,28 @@ export default function HomeScreen({ navigation }) {
             />
 
             <Portal>
-                <Modal visible={visible} onDismiss={() => setVisible(false)}>
-                    <Card style={{ margin: 16, padding: 16, backgroundColor: theme.colors.surface, marginBottom: 160}}>
-                        <Text variant="titleMedium" style={{ marginBottom: 12 }}>
-                            Új lista
-                        </Text>
-
+                <Dialog visible={visible} onDismiss={() => {
+                    setVisible(false);
+                    setListName('');
+                }} style={{ backgroundColor: theme.colors.surface}}>
+                    <Dialog.Title>Új lista</Dialog.Title>
+                    <Dialog.Content>
                         <TextInput
                             label="Lista neve"
                             value={listName}
                             onChangeText={setListName}
-                            style={{ marginBottom: 12 }}
                         />
-
-                        <Button mode="contained" onPress={createList}>
-                            Létrehozás
-                        </Button>
-
-                        <Button mode="text" onPress={() => {
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={() => {
                             setVisible(false);
                             setListName('');
-                        }}>
-                            Mégse
-                        </Button>
-                    </Card>
-                </Modal>
-
+                        }}>Mégse</Button>
+                        <Button mode="contained" onPress={createList}>Létrehozás</Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
+            <Portal>
                 <Dialog visible={deleteVisible} onDismiss={() => setDeleteVisible(false)} style={{ backgroundColor: theme.colors.surface }}>
                     <Dialog.Title>Lista törlése</Dialog.Title>
                     <Dialog.Content>
@@ -239,22 +235,24 @@ export default function HomeScreen({ navigation }) {
             </Portal>
 
             <Portal>
-                <Modal visible={editVisible} onDismiss={() => setEditVisible(false)}>
-                    <Card style={{ margin: 16, padding: 16, backgroundColor: theme.colors.surface, marginBottom: 160}}>
-                        <Text variant="titleMedium" style={{ marginBottom: 12 }}>
-                            Lista átnevezése
-                        </Text>
+                <Dialog visible={editVisible} onDismiss={() => setEditVisible(false)}
+                        style={{ backgroundColor: theme.colors.surface}}>
+                    <Dialog.Title>Lista átnevezése</Dialog.Title>
+                    <Dialog.Content>
                         <TextInput
                             label="Új név"
                             value={listName}
                             onChangeText={setListName}
-                            style={{ marginBottom: 12 }}
                         />
-                        <Button mode="contained" onPress={updateList}>
-                            Mentés
-                        </Button>
-                    </Card>
-                </Modal>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={() => {
+                            setEditVisible(false);
+                            setListName('');
+                        }}>Mégse</Button>
+                        <Button mode="contained" onPress={updateList}>Mentés</Button>
+                    </Dialog.Actions>
+                </Dialog>
             </Portal>
 
             <FAB

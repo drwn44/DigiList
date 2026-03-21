@@ -38,8 +38,8 @@ const lightColors = {
     surfaceVariant: '#E8F5EE',
     onSurfaceVariant: '#444444',
     outline: '#2D8A55',
-    error: '#B00020',
-    onError: '#FFFFFF',
+    error: '#c53d51',
+    onError: '#690024',
 };
 
 export const darkTheme = { ...MD3DarkTheme, colors: { ...MD3DarkTheme.colors, ...darkColors } };

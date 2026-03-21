@@ -55,15 +55,18 @@ export default function ListItemScreen({ route }) {
 
     const addItem = async () => {
         if (!itemName.trim()) return;
+        const name = itemName;
+        const quantity = itemQuantity;
+        const unit = itemUnit;
         setAddItemVisible(false);
         setItemName('');
         setItemQuantity('1');
         setItemUnit('db');
         await addDoc(collection(db, 'lists', listId, 'items'), {
-            name: itemName,
+            name: name,
             done: false,
-            quantity: parseFloat(itemQuantity) || 1,
-            unit: itemUnit,
+            quantity: parseFloat(quantity) || 1,
+            unit: unit,
             createdAt: Timestamp.now(),
         });
     };

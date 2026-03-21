@@ -2,7 +2,7 @@ import {Text, TextInput, Button, HelperText, Divider, useTheme} from 'react-nati
 import { View } from 'react-native';
 import { useState } from 'react';
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
-import { setDoc, doc, Timestamp } from 'firebase/firestore';
+import { setDoc, doc, Timestamp, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { authStyles as styles } from '../styles/authStyles';
 import { getAuthErrorMessage } from "../utils/authErrors";
@@ -62,8 +62,10 @@ export default function RegisterScreen({ navigation }) {
             const googleCredential = GoogleAuthProvider.credential(userInfo.data.idToken);
             const userCredential = await signInWithCredential(auth, googleCredential);
 
-            if (userCredential.additionalUserInfo?.isNewUser) {
-                await setDoc(doc(db, 'users', userCredential.user.uid), {
+            const userDocRef = doc(db, 'users', userCredential.user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            if (!userDocSnap.exists()) {
+                await setDoc(userDocRef, {
                     displayName: userCredential.user.displayName || '',
                     email: userCredential.user.email.toLowerCase(),
                     createdAt: Timestamp.now(),

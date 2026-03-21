@@ -29,7 +29,7 @@ export default function ShareListModal({ visible, onDismiss, listId, members = [
             setMemberDetails(results);
         };
 
-        fetchMembers();
+        void fetchMembers();
     }, [visible, members]);
 
     const handleAdd = async () => {
@@ -66,7 +66,6 @@ export default function ShareListModal({ visible, onDismiss, listId, members = [
 
             setEmail('');
         } catch (e) {
-            console.error('Share error:', e);
             setAddError('Hiba történt, próbáld újra.');
         } finally {
             setLoading(false);
@@ -79,7 +78,6 @@ export default function ShareListModal({ visible, onDismiss, listId, members = [
                 members: arrayRemove(uid),
             });
         } catch (e) {
-            alert('Nem sikerült eltávolítani a tagot.');
         }
     };
 
