@@ -63,7 +63,8 @@ export default function LoyaltyCardsScreen() {
     };
 
     const saveCard = async () => {
-        if (!cardName.trim() || !barcodeValue.trim()) return;
+        if (!cardName.trim() || !barcodeValue.trim())
+            return;
         setAddVisible(false);
         setCardName('');
         setBarcodeValue('');
@@ -77,8 +78,8 @@ export default function LoyaltyCardsScreen() {
     };
 
     const confirmDelete = async () => {
-        await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'loyaltyCards', selectedCardId));
         setDeleteVisible(false);
+        await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'loyaltyCards', selectedCardId));
         setSelectedCardId(null);
         setSnackbarMessage("Sikeres törlés!");
         setSnackbarVisible(true);

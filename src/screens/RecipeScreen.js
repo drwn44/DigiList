@@ -76,21 +76,28 @@ export default function RecipeScreen() {
                     messages: [
                         {
                             role: 'system',
-                            content: 'Te egy magyar szakács asszisztens vagy. Mindig magyarul válaszolj, és pontosan azt az ételt készítsd el, amit kérnek. Soha ne találj ki más ételt.'
+                            content: `
+                                    Te egy profi magyar szakács vagy.
+                                    
+                                    SZABÁLYOK:
+                                    - CSAK valós, ismert ételek receptjeit adhatod meg
+                                    - A válaszod MINDIG valid JSON legyen
+                                    - SOHA ne írj magyarázatot a JSON-on kívül
+                                    - Ha nem étel: {"error": "not_a_food"}
+                                    - A JSON formátum kötelező és pontosan követendő.
+                                    `
                         },
                         {
                             role: 'user',
                             content: `Készíts egy részletes magyar nyelvű receptet ehhez az ételhez: "${dishName}".
-                        
+
                                     Válaszolj CSAK valid JSON formátumban, semmi mást ne írj, még backtick-eket sem. A JSON struktúra:
                                     {
                                       "name": "Az étel neve",
                                       "servings": 4,
-                                      "prepTime": "15 perc",
-                                      "cookTime": "30 perc",
                                       "ingredients": [
                                         { "name": "Csirkemell", "quantity": "500", "unit": "g", "purchaseQuantity": "500", "purchaseUnit": "g" },
-                                        { "name": "Hagyma", "quantity": "2", "unit": "db", "purchaseQuantity": "500", "purchaseUnit": "g" }
+                                        { "name": "Hagyma", "quantity": "2", "unit": "db", "purchaseQuantity": "1", "purchaseUnit": "db" }
                                       ],
                                       "steps": [
                                         "Első lépés leírása",
@@ -98,20 +105,25 @@ export default function RecipeScreen() {
                                       ]
                                     }
                                     
-                                    Fontos: a "purchaseUnit" mezőben CSAK ezek az értékek szerepelhetnek: db, kg, g, l, dl, ml, csomag, karton.
-                                    A "unit" mezőben bármilyen mértékegység szerepelhet (pl. evőkanál, teáskanál, csepp, marék, gerezd, stb.)
-                                    Ha a recept sütést vagy főzést igényel, minden lépésnél ahol hőmérséklet szükséges, tüntesd fel a pontos hőfokot Celsius-ban (pl. "180°C-on süsd 30 percig").`
-
+                                    Fontos szabályok:
+                                    - Kizárólag magyar nyelvű, valós recepteket generálsz.
+                                    - A "purchaseUnit" mezőben CSAK ezek az értékek szerepelhetnek: db, kg, g, l, dl, ml, csomag, karton
+                                    - A "unit" mezőben bármilyen mértékegység szerepelhet (pl. evőkanál, teáskanál, gerezd, csokor, stb.)
+                                    - Ha a bemenet nem értelmezhető ételként (pl. tárgy, absztrakt fogalom), a válaszod kizárólag: {"error": "not_a_food"}.`
                         }
                     ],
                     temperature: 0.7,
+                    response_format: { type: "json_object" },
                 }),
             });
 
             const data = await response.json();
             const text = data.choices[0].message.content.trim();
-            const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            const parsed = JSON.parse(cleaned);
+            const parsed = JSON.parse(text);
+            if (parsed.error === 'not_a_food') {
+                setError('Ez nem egy ismert étel. Próbálj meg egy valós ételnevet beírni!');
+                return;
+            }
             setRecipe(parsed);
         } catch (e) {
             setError('Nem sikerült a recept generálása. Próbáld újra!');
@@ -293,7 +305,7 @@ export default function RecipeScreen() {
                             />
                         </View>
                         <Text variant="bodySmall" style={{ opacity: 0.5, marginBottom: 16 }}>
-                            {recipe.servings} adag · Előkészítés: {recipe.prepTime} · Főzés: {recipe.cookTime}
+                            {recipe.servings} adag
                         </Text>
 
                         <Card style={{ marginBottom: 16 }}>

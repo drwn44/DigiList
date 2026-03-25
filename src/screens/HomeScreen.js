@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore';
 import { useEffect, useState } from "react";
 import {
+    ActivityIndicator,
     Button,
     Card,
     Dialog,
@@ -48,6 +49,7 @@ export default function HomeScreen({ navigation }) {
     const [sharingList, setSharingList] = useState(null);
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!auth.currentUser)
@@ -58,6 +60,7 @@ export default function HomeScreen({ navigation }) {
         );
         return onSnapshot(q, (snapshot) => {
             setLists(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+            setLoading(false);
         });
     }, []);
 
@@ -75,11 +78,11 @@ export default function HomeScreen({ navigation }) {
     };
 
     const confirmDelete = async () => {
+        setDeleteVisible(false);
         const itemsRef = collection(db, 'lists', selectedListId, 'items');
         const itemsSnapshot = await getDocs(itemsRef);
         await Promise.all(itemsSnapshot.docs.map(d => deleteDoc(d.ref)));
         await deleteDoc(doc(db, 'lists', selectedListId));
-        setDeleteVisible(false);
         setSelectedListId(null);
         setSnackbarMessage("Sikeres törlés!");
         setSnackbarVisible(true);
@@ -88,19 +91,19 @@ export default function HomeScreen({ navigation }) {
     const updateList = async () => {
         if (!listName.trim())
             return;
+        setEditVisible(false);
         await updateDoc(doc(db, 'lists', editingListId), {
             name: listName,
             });
-        setEditVisible(false);
         setEditingListId(null);
         setListName('');
     };
 
     const leaveList = async () => {
+        setActionVisible(false);
         await updateDoc(doc(db, 'lists', selectedListId), {
             members: arrayRemove(auth.currentUser.uid),
         });
-        setActionVisible(false);
         setSelectedListId(null);
         setSnackbarMessage("Sikeresen kiléptél a listából!")
         setSnackbarVisible(true);
@@ -110,6 +113,9 @@ export default function HomeScreen({ navigation }) {
         <SafeAreaView style={styles.container}>
             <AppHeader title="Bevásárlólisták"/>
             <OfflineBanner />
+            {loading ? (
+                <ActivityIndicator style={{ marginTop: 32 }} size="large" />
+            ) : (
             <FlatList
                 contentContainerStyle={{ padding: 16, paddingBottom: 96, flexGrow: lists.length === 0 ? 1 : 0 }}
                 data={lists}
@@ -164,7 +170,7 @@ export default function HomeScreen({ navigation }) {
                         />
                     </Card>
                 )}
-            />
+            />)}
 
             <Portal>
                 <Dialog visible={visible} onDismiss={() => {
