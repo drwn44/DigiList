@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const PRODUCTS_JSON_URL = 'https://raw.githubusercontent.com/drwn44/DigiList/master/products.json';
+const PRODUCTS_JSON_URL = 'https://raw.githubusercontent.com/drwn44/DigiList/master/src/data/products.json';
 const CACHE_KEY = 'arfigyelo_products';
 const CACHE_DATE_KEY = 'arfigyelo_last_updated';
 const CACHE_CHUNK_COUNT_KEY = 'arfigyelo_chunk_count';

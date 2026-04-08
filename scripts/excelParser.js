@@ -4,7 +4,7 @@ const https = require('https');
 const path = require('path');
 
 const EXCEL_URL = 'https://cdnarfigyeloprodweu.azureedge.net/excel/arfigyelo_napi_termekadatok.xlsx';
-const OUTPUT_PATH = path.join(__dirname, '..', 'products.json');
+const OUTPUT_PATH = path.join(__dirname, '..', 'src', 'data', 'products.json');
 
 const parsePrice = (val) => {
     if (!val) return 0;
