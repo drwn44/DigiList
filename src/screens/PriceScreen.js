@@ -250,6 +250,11 @@ export default function PriceScreen() {
                                         subtitle="Próbálj másra keresni"
                                     />
                                 }
+                                ListFooterComponent={
+                                    <Text variant="bodySmall" style={{ textAlign: 'center', opacity: 0.4, padding: 16 }}>
+                                        Áradatok forrása: arfigyelo.gvh.hu
+                                    </Text>
+                                }
                                 renderItem={({ item }) => (
                                     <TouchableOpacity
                                         onPress={() => {
