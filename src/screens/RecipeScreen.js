@@ -111,7 +111,7 @@ export default function RecipeScreen() {
                                     - A "unit" mezőben bármilyen mértékegység szerepelhet (pl. evőkanál, teáskanál, gerezd, csokor, stb.)
                                     - Ha a bemenet nem értelmezhető ételként (pl. tárgy, absztrakt fogalom), a válaszod kizárólag: {"error": "not_a_food"}.`
                         }
-                    ],
+                    ], /* system + user promptok*/
                     temperature: 0.7,
                     response_format: { type: "json_object" },
                 }),
