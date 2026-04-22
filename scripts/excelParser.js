@@ -40,7 +40,7 @@ const run = async () => {
         maxPrice: parsePrice(row[8]),
         minUnitPrice: parsePrice(row[9]),
         maxUnitPrice: parsePrice(row[10]),
-    })).filter(p => p.name && p.categoryId > 0);
+    })).filter(p => p.categoryName && p.categoryId > 0);
 
     console.log(`Products: ${products.length}`);
     fs.writeFileSync(OUTPUT_PATH, JSON.stringify(products));
