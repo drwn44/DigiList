@@ -11,6 +11,13 @@ const cacheProducts = async (products) => {
     const today = new Date().toISOString().split('T')[0];
     const chunks = Math.ceil(products.length / CHUNK_SIZE);
 
+    const oldChunkCount = await AsyncStorage.getItem(CACHE_CHUNK_COUNT_KEY);
+    if (oldChunkCount) {
+        for (let i = 0; i < parseInt(oldChunkCount); i++) {
+            await AsyncStorage.removeItem(`${CACHE_KEY}_${i}`);
+        }
+    }
+
     for (let i = 0; i < chunks; i++) {
         const chunk = products.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
         await AsyncStorage.setItem(`${CACHE_KEY}_${i}`, JSON.stringify(chunk));
@@ -42,7 +49,6 @@ export default function useExcelPriceSheet() {
     useEffect(() => {
         const fetchProducts = async () => {
             setLoading(true);
-
             try {
                 const today = new Date().toISOString().split('T')[0];
                 const lastUpdated = await AsyncStorage.getItem(CACHE_DATE_KEY);
@@ -57,12 +63,14 @@ export default function useExcelPriceSheet() {
                 }
                 const response = await fetch(PRODUCTS_JSON_URL);
                 const freshProducts = await response.json();
-                await cacheProducts(freshProducts);
+                try {
+                    await cacheProducts(freshProducts);
+                } catch (cacheError) {
+                    console.error(cacheError);
+                }
                 setProducts(freshProducts);
             } catch (fetchError) {
-                console.warn('Nem sikerült a friss adatok lekérése:', fetchError.message);
                 const cached = await loadCachedProducts();
-
                 if (cached) {
                     setProducts(cached);
                 } else {
