@@ -31,8 +31,6 @@ const run = async () => {
     const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
 
     const products = rows.slice(1).map(row => ({
-        id: String(row[0] || ''),
-        name: String(row[1] || '').trim(),
         categoryId: parseInt(row[2]) || 0,
         categoryName: String(row[3] || '').trim(),
         store: String(row[4] || '').trim(),
